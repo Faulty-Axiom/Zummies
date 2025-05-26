@@ -1,0 +1,842 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingTop="8dp"
+    android:paddingBottom="16dp"
+    android:paddingStart="16dp"
+    android:paddingEnd="16dp">
+
+    <!-- Basic Info Section -->
+    <ImageView
+        android:id="@+id/rikishiImageView"
+        android:layout_width="270dp"
+        android:layout_height="474dp"
+        android:layout_gravity="center_horizontal"
+        android:scaleType="fitCenter"
+        android:visibility="gone"
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="12dp"/>
+
+    <TextView
+        android:id="@+id/shikonaHistoryTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="16sp"
+        android:textColor="@android:color/white"
+        android:layout_marginBottom="12dp"/>
+
+    <TextView
+        android:id="@+id/highestRankTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="16sp"
+        android:textColor="@android:color/white"
+        android:layout_marginBottom="12dp"/>
+
+    <TextView
+        android:id="@+id/rankTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="16sp"
+        android:textColor="@android:color/white"
+        android:layout_marginBottom="12dp"/>
+
+    <TextView
+        android:id="@+id/stableTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="16sp"
+        android:textColor="@android:color/white"
+        android:layout_marginBottom="12dp"/>
+
+    <TextView
+        android:id="@+id/birthDateTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="16sp"
+        android:textColor="@android:color/white"
+        android:layout_marginBottom="12dp"/>
+
+    <TextView
+        android:id="@+id/shusshinTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="16sp"
+        android:textColor="@android:color/white"
+        android:layout_marginBottom="12dp"/>
+
+    <TextView
+        android:id="@+id/weightTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="16sp"
+        android:textColor="@android:color/white"
+        android:layout_marginBottom="12dp"/>
+
+    <TextView
+        android:id="@+id/heightTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="16sp"
+        android:textColor="@android:color/white"
+        android:layout_marginBottom="12dp"/>
+
+    <TextView
+        android:id="@+id/debutTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="16sp"
+        android:textColor="@android:color/white"
+        android:layout_marginBottom="12dp"/>
+
+    <!-- Stats Section -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@android:color/white"
+        android:layout_marginVertical="8dp" />
+
+    <LinearLayout
+        android:id="@+id/statsSection"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <!-- Add this after your existing stats section -->
+        <TextView
+            android:id="@+id/divisionStatsTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/division_statistics"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/white"
+            android:gravity="center"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="8dp"/>
+
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <!-- First Column (Division Names) -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="80dp"
+                        android:layout_height="wrap_content"
+                        android:text="@string/division"
+                        android:textStyle="bold"
+                        android:textSize="14sp"
+                        android:gravity="center"
+                        android:textColor="@android:color/white"
+                        android:paddingTop="8dp"
+                        android:paddingLeft="4dp"
+                        android:paddingRight="4dp"
+                        android:paddingBottom="8dp"
+                        android:background="@color/table_header"/>
+
+                    <TextView
+                        android:layout_width="80dp"
+                        android:layout_height="wrap_content"
+                        android:text="@string/career"
+                        android:textStyle="bold"
+                        android:textSize="14sp"
+                        android:gravity="center"
+                        android:textColor="@android:color/white"
+                        android:paddingTop="8dp"
+                        android:paddingLeft="4dp"
+                        android:paddingRight="4dp"
+                        android:paddingBottom="8dp"
+                        android:background="@color/table_row_even"/>
+
+                    <TextView
+                        android:layout_width="80dp"
+                        android:layout_height="wrap_content"
+                        android:text="@string/makuuchi"
+                        android:textSize="14sp"
+                        android:gravity="center"
+                        android:textColor="@android:color/white"
+                        android:paddingTop="8dp"
+                        android:paddingLeft="4dp"
+                        android:paddingRight="4dp"
+                        android:paddingBottom="8dp"
+                        android:background="@color/table_row_odd"/>
+
+                    <TextView
+                        android:layout_width="80dp"
+                        android:layout_height="wrap_content"
+                        android:text="@string/juryo"
+                        android:textSize="14sp"
+                        android:gravity="center"
+                        android:textColor="@android:color/white"
+                        android:paddingTop="8dp"
+                        android:paddingLeft="4dp"
+                        android:paddingRight="4dp"
+                        android:paddingBottom="8dp"
+                        android:background="@color/table_row_even"/>
+
+                    <TextView
+                        android:layout_width="80dp"
+                        android:layout_height="wrap_content"
+                        android:text="@string/makushita"
+                        android:textSize="14sp"
+                        android:gravity="center"
+                        android:textColor="@android:color/white"
+                        android:paddingTop="8dp"
+                        android:paddingLeft="4dp"
+                        android:paddingRight="4dp"
+                        android:paddingBottom="8dp"
+                        android:background="@color/table_row_odd"/>
+
+                    <TextView
+                        android:layout_width="80dp"
+                        android:layout_height="wrap_content"
+                        android:text="@string/sandanme"
+                        android:textSize="14sp"
+                        android:gravity="center"
+                        android:textColor="@android:color/white"
+                        android:paddingTop="8dp"
+                        android:paddingLeft="4dp"
+                        android:paddingRight="4dp"
+                        android:paddingBottom="8dp"
+                        android:background="@color/table_row_even"/>
+
+                    <TextView
+                        android:layout_width="80dp"
+                        android:layout_height="wrap_content"
+                        android:text="@string/jonidan"
+                        android:textSize="14sp"
+                        android:gravity="center"
+                        android:textColor="@android:color/white"
+                        android:paddingTop="8dp"
+                        android:paddingLeft="4dp"
+                        android:paddingRight="4dp"
+                        android:paddingBottom="8dp"
+                        android:background="@color/table_row_odd"/>
+
+                    <TextView
+                        android:layout_width="80dp"
+                        android:layout_height="wrap_content"
+                        android:text="@string/jonokuchi"
+                        android:textSize="14sp"
+                        android:gravity="center"
+                        android:textColor="@android:color/white"
+                        android:paddingTop="8dp"
+                        android:paddingLeft="4dp"
+                        android:paddingRight="4dp"
+                        android:paddingBottom="8dp"
+                        android:background="@color/table_row_even"/>
+
+                </LinearLayout>
+
+                <!-- Basho Column -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="50dp"
+                        android:layout_height="wrap_content"
+                        android:text="@string/basho"
+                        android:textStyle="bold"
+                        android:textSize="14sp"
+                        android:gravity="center"
+                        android:textColor="@android:color/white"
+                        android:paddingTop="8dp"
+                        android:paddingLeft="4dp"
+                        android:paddingRight="4dp"
+                        android:paddingBottom="8dp"
+                        android:background="@color/table_header"/>
+
+                    <!-- Career basho count -->
+                    <TextView
+                        android:id="@+id/careerBashoTextView"
+                        android:layout_width="50dp"
+                        android:layout_height="wrap_content"
+                        android:textSize="14sp"
+                        android:textColor="@android:color/white"
+                        android:padding="8dp"
+                        android:gravity="center"
+                        android:background="@color/table_row_even"/>
+
+                    <!-- Division basho counts -->
+                    <TextView
+                        android:id="@+id/makuuchiBashoTextView"
+                        android:layout_width="50dp"
+                        android:layout_height="wrap_content"
+                        android:textSize="14sp"
+                        android:textColor="@android:color/white"
+                        android:padding="8dp"
+                        android:gravity="center"
+                        android:background="@color/table_row_odd"/>
+
+                    <TextView
+                        android:id="@+id/juryoBashoTextView"
+                        android:layout_width="50dp"
+                        android:layout_height="wrap_content"
+                        android:textSize="14sp"
+                        android:textColor="@android:color/white"
+                        android:padding="8dp"
+                        android:gravity="center"
+                        android:background="@color/table_row_even"/>
+
+                    <TextView
+                        android:id="@+id/makushitaBashoTextView"
+                        android:layout_width="50dp"
+                        android:layout_height="wrap_content"
+                        android:textSize="14sp"
+                        android:textColor="@android:color/white"
+                        android:padding="8dp"
+                        android:gravity="center"
+                        android:background="@color/table_row_odd"/>
+
+                    <TextView
+                        android:id="@+id/sandanmeBashoTextView"
+                        android:layout_width="50dp"
+                        android:layout_height="wrap_content"
+                        android:textSize="14sp"
+                        android:textColor="@android:color/white"
+                        android:padding="8dp"
+                        android:gravity="center"
+                        android:background="@color/table_row_even"/>
+
+                    <TextView
+                        android:id="@+id/jonidanBashoTextView"
+                        android:layout_width="50dp"
+                        android:layout_height="wrap_content"
+                        android:textSize="14sp"
+                        android:textColor="@android:color/white"
+                        android:padding="8dp"
+                        android:gravity="center"
+                        android:background="@color/table_row_odd"/>
+
+                    <TextView
+                        android:id="@+id/jonokuchiBashoTextView"
+                        android:layout_width="50dp"
+                        android:layout_height="wrap_content"
+                        android:textSize="14sp"
+                        android:textColor="@android:color/white"
+                        android:padding="8dp"
+                        android:gravity="center"
+                        android:background="@color/table_row_even"/>
+
+                </LinearLayout>
+
+                <!-- Yusho Column -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="50dp"
+                        android:layout_height="wrap_content"
+                        android:text="@string/yusho"
+                        android:textStyle="bold"
+                        android:textSize="14sp"
+                        android:textColor="@android:color/white"
+                        android:paddingTop="8dp"
+                        android:paddingLeft="4dp"
+                        android:paddingRight="4dp"
+                        android:paddingBottom="8dp"
+                        android:gravity="center"
+                        android:background="@color/table_header"/>
+
+                    <!-- Career yusho count -->
+                    <TextView
+                        android:id="@+id/careerYushoTextView"
+                        android:layout_width="50dp"
+                        android:layout_height="wrap_content"
+                        android:textSize="14sp"
+                        android:textColor="@android:color/white"
+                        android:padding="8dp"
+                        android:gravity="center"
+                        android:background="@color/table_row_even"/>
+
+                    <!-- Division yusho counts -->
+                    <TextView
+                        android:id="@+id/makuuchiYushoTextView"
+                        android:layout_width="50dp"
+                        android:layout_height="wrap_content"
+                        android:textSize="14sp"
+                        android:textColor="@android:color/white"
+                        android:padding="8dp"
+                        android:gravity="center"
+                        android:background="@color/table_row_odd"/>
+
+                    <TextView
+                        android:id="@+id/juryoYushoTextView"
+                        android:layout_width="50dp"
+                        android:layout_height="wrap_content"
+                        android:textSize="14sp"
+                        android:textColor="@android:color/white"
+                        android:padding="8dp"
+                        android:gravity="center"
+                        android:background="@color/table_row_even"/>
+
+                    <TextView
+                        android:id="@+id/makushitaYushoTextView"
+                        android:layout_width="50dp"
+                        android:layout_height="wrap_content"
+                        android:textSize="14sp"
+                        android:textColor="@android:color/white"
+                        android:padding="8dp"
+                        android:gravity="center"
+                        android:background="@color/table_row_odd"/>
+
+                    <TextView
+                        android:id="@+id/sandanmeYushoTextView"
+                        android:layout_width="50dp"
+                        android:layout_height="wrap_content"
+                        android:textSize="14sp"
+                        android:textColor="@android:color/white"
+                        android:padding="8dp"
+                        android:gravity="center"
+                        android:background="@color/table_row_even"/>
+
+                    <TextView
+                        android:id="@+id/jonidanYushoTextView"
+                        android:layout_width="50dp"
+                        android:layout_height="wrap_content"
+                        android:textSize="14sp"
+                        android:textColor="@android:color/white"
+                        android:padding="8dp"
+                        android:gravity="center"
+                        android:background="@color/table_row_odd"/>
+
+                    <TextView
+                        android:id="@+id/jonokuchiYushoTextView"
+                        android:layout_width="50dp"
+                        android:layout_height="wrap_content"
+                        android:textSize="14sp"
+                        android:textColor="@android:color/white"
+                        android:padding="8dp"
+                        android:gravity="center"
+                        android:background="@color/table_row_even"/>
+
+                </LinearLayout>
+
+                <!-- Wins Column -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="40dp"
+                        android:layout_height="wrap_content"
+                        android:text="@string/wins"
+                        android:textStyle="bold"
+                        android:textSize="14sp"
+                        android:textColor="@android:color/white"
+                        android:paddingTop="8dp"
+                        android:paddingLeft="4dp"
+                        android:paddingRight="4dp"
+                        android:paddingBottom="8dp"
+                        android:gravity="center"
+                        android:background="@color/table_header"/>
+
+                    <!-- Career wins count -->
+                    <TextView
+                        android:id="@+id/careerWinsTextView"
+                        android:layout_width="40dp"
+                        android:layout_height="wrap_content"
+                        android:textSize="14sp"
+                        android:textColor="@android:color/white"
+                        android:paddingTop="8dp"
+                        android:paddingLeft="4dp"
+                        android:paddingRight="4dp"
+                        android:paddingBottom="8dp"
+                        android:gravity="center"
+                        android:background="@color/table_row_even"/>
+
+                    <!-- Division wins counts -->
+                    <TextView
+                        android:id="@+id/makuuchiWinsTextView"
+                        android:layout_width="40dp"
+                        android:layout_height="wrap_content"
+                        android:textSize="14sp"
+                        android:textColor="@android:color/white"
+                        android:paddingTop="8dp"
+                        android:paddingLeft="4dp"
+                        android:paddingRight="4dp"
+                        android:paddingBottom="8dp"
+                        android:gravity="center"
+                        android:background="@color/table_row_odd"/>
+
+                    <TextView
+                        android:id="@+id/juryoWinsTextView"
+                        android:layout_width="40dp"
+                        android:layout_height="wrap_content"
+                        android:textSize="14sp"
+                        android:textColor="@android:color/white"
+                        android:paddingTop="8dp"
+                        android:paddingLeft="4dp"
+                        android:paddingRight="4dp"
+                        android:paddingBottom="8dp"
+                        android:gravity="center"
+                        android:background="@color/table_row_even"/>
+
+                    <TextView
+                        android:id="@+id/makushitaWinsTextView"
+                        android:layout_width="40dp"
+                        android:layout_height="wrap_content"
+                        android:textSize="14sp"
+                        android:textColor="@android:color/white"
+                        android:paddingTop="8dp"
+                        android:paddingLeft="4dp"
+                        android:paddingRight="4dp"
+                        android:paddingBottom="8dp"
+                        android:gravity="center"
+                        android:background="@color/table_row_odd"/>
+
+                    <TextView
+                        android:id="@+id/sandanmeWinsTextView"
+                        android:layout_width="40dp"
+                        android:layout_height="wrap_content"
+                        android:textSize="14sp"
+                        android:textColor="@android:color/white"
+                        android:paddingTop="8dp"
+                        android:paddingLeft="4dp"
+                        android:paddingRight="4dp"
+                        android:paddingBottom="8dp"
+                        android:gravity="center"
+                        android:background="@color/table_row_even"/>
+
+                    <TextView
+                        android:id="@+id/jonidanWinsTextView"
+                        android:layout_width="40dp"
+                        android:layout_height="wrap_content"
+                        android:textSize="14sp"
+                        android:textColor="@android:color/white"
+                        android:paddingTop="8dp"
+                        android:paddingLeft="4dp"
+                        android:paddingRight="4dp"
+                        android:paddingBottom="8dp"
+                        android:gravity="center"
+                        android:background="@color/table_row_odd"/>
+
+                    <TextView
+                        android:id="@+id/jonokuchiWinsTextView"
+                        android:layout_width="40dp"
+                        android:layout_height="wrap_content"
+                        android:textSize="14sp"
+                        android:textColor="@android:color/white"
+                        android:paddingTop="8dp"
+                        android:paddingLeft="4dp"
+                        android:paddingRight="4dp"
+                        android:paddingBottom="8dp"
+                        android:gravity="center"
+                        android:background="@color/table_row_even"/>
+
+                </LinearLayout>
+
+                <!-- Losses Column -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="55dp"
+                        android:layout_height="wrap_content"
+                        android:text="@string/losses"
+                        android:textStyle="bold"
+                        android:textSize="14sp"
+                        android:textColor="@android:color/white"
+                        android:paddingTop="8dp"
+                        android:paddingLeft="4dp"
+                        android:paddingRight="4dp"
+                        android:paddingBottom="8dp"
+                        android:gravity="center"
+                        android:background="@color/table_header"/>
+
+                    <!-- Career losses count -->
+                    <TextView
+                        android:id="@+id/careerLossesTextView"
+                        android:layout_width="55dp"
+                        android:layout_height="wrap_content"
+                        android:textSize="14sp"
+                        android:textColor="@android:color/white"
+                        android:paddingTop="8dp"
+                        android:paddingLeft="4dp"
+                        android:paddingRight="4dp"
+                        android:paddingBottom="8dp"
+                        android:gravity="center"
+                        android:background="@color/table_row_even"/>
+
+                    <!-- Division losses counts -->
+                    <TextView
+                        android:id="@+id/makuuchiLossesTextView"
+                        android:layout_width="55dp"
+                        android:layout_height="wrap_content"
+                        android:textSize="14sp"
+                        android:textColor="@android:color/white"
+                        android:paddingTop="8dp"
+                        android:paddingLeft="4dp"
+                        android:paddingRight="4dp"
+                        android:paddingBottom="8dp"
+                        android:gravity="center"
+                        android:background="@color/table_row_odd"/>
+
+                    <TextView
+                        android:id="@+id/juryoLossesTextView"
+                        android:layout_width="55dp"
+                        android:layout_height="wrap_content"
+                        android:textSize="14sp"
+                        android:textColor="@android:color/white"
+                        android:paddingTop="8dp"
+                        android:paddingLeft="4dp"
+                        android:paddingRight="4dp"
+                        android:paddingBottom="8dp"
+                        android:gravity="center"
+                        android:background="@color/table_row_even"/>
+
+                    <TextView
+                        android:id="@+id/makushitaLossesTextView"
+                        android:layout_width="55dp"
+                        android:layout_height="wrap_content"
+                        android:textSize="14sp"
+                        android:textColor="@android:color/white"
+                        android:paddingTop="8dp"
+                        android:paddingLeft="4dp"
+                        android:paddingRight="4dp"
+                        android:paddingBottom="8dp"
+                        android:gravity="center"
+                        android:background="@color/table_row_odd"/>
+
+                    <TextView
+                        android:id="@+id/sandanmeLossesTextView"
+                        android:layout_width="55dp"
+                        android:layout_height="wrap_content"
+                        android:textSize="14sp"
+                        android:textColor="@android:color/white"
+                        android:paddingTop="8dp"
+                        android:paddingLeft="4dp"
+                        android:paddingRight="4dp"
+                        android:paddingBottom="8dp"
+                        android:gravity="center"
+                        android:background="@color/table_row_even"/>
+
+                    <TextView
+                        android:id="@+id/jonidanLossesTextView"
+                        android:layout_width="55dp"
+                        android:layout_height="wrap_content"
+                        android:textSize="14sp"
+                        android:textColor="@android:color/white"
+                        android:paddingTop="8dp"
+                        android:paddingLeft="4dp"
+                        android:paddingRight="4dp"
+                        android:paddingBottom="8dp"
+                        android:gravity="center"
+                        android:background="@color/table_row_odd"/>
+
+                    <TextView
+                        android:id="@+id/jonokuchiLossesTextView"
+                        android:layout_width="55dp"
+                        android:layout_height="wrap_content"
+                        android:textSize="14sp"
+                        android:textColor="@android:color/white"
+                        android:paddingTop="8dp"
+                        android:paddingLeft="4dp"
+                        android:paddingRight="4dp"
+                        android:paddingBottom="8dp"
+                        android:gravity="center"
+                        android:background="@color/table_row_even"/>
+
+                </LinearLayout>
+
+                <!-- Total Column -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="40dp"
+                        android:layout_height="wrap_content"
+                        android:text="@string/total"
+                        android:textStyle="bold"
+                        android:textSize="14sp"
+                        android:textColor="@android:color/white"
+                        android:paddingTop="8dp"
+                        android:paddingLeft="4dp"
+                        android:paddingRight="4dp"
+                        android:paddingBottom="8dp"
+                        android:gravity="center"
+                        android:background="@color/table_header"/>
+
+                    <!-- Career total count -->
+                    <TextView
+                        android:id="@+id/careerTotalTextView"
+                        android:layout_width="40dp"
+                        android:layout_height="wrap_content"
+                        android:textSize="14sp"
+                        android:textColor="@android:color/white"
+                        android:paddingTop="8dp"
+                        android:paddingLeft="4dp"
+                        android:paddingRight="4dp"
+                        android:paddingBottom="8dp"
+                        android:gravity="center"
+                        android:background="@color/table_row_even"/>
+
+                    <!-- Division total counts -->
+                    <TextView
+                        android:id="@+id/makuuchiTotalTextView"
+                        android:layout_width="40dp"
+                        android:layout_height="wrap_content"
+                        android:textSize="14sp"
+                        android:textColor="@android:color/white"
+                        android:paddingTop="8dp"
+                        android:paddingLeft="4dp"
+                        android:paddingRight="4dp"
+                        android:paddingBottom="8dp"
+                        android:gravity="center"
+                        android:background="@color/table_row_odd"/>
+
+                    <TextView
+                        android:id="@+id/juryoTotalTextView"
+                        android:layout_width="40dp"
+                        android:layout_height="wrap_content"
+                        android:textSize="14sp"
+                        android:textColor="@android:color/white"
+                        android:paddingTop="8dp"
+                        android:paddingLeft="4dp"
+                        android:paddingRight="4dp"
+                        android:paddingBottom="8dp"
+                        android:gravity="center"
+                        android:background="@color/table_row_even"/>
+
+                    <TextView
+                        android:id="@+id/makushitaTotalTextView"
+                        android:layout_width="40dp"
+                        android:layout_height="wrap_content"
+                        android:textSize="14sp"
+                        android:textColor="@android:color/white"
+                        android:paddingTop="8dp"
+                        android:paddingLeft="4dp"
+                        android:paddingRight="4dp"
+                        android:paddingBottom="8dp"
+                        android:gravity="center"
+                        android:background="@color/table_row_odd"/>
+
+                    <TextView
+                        android:id="@+id/sandanmeTotalTextView"
+                        android:layout_width="40dp"
+                        android:layout_height="wrap_content"
+                        android:textSize="14sp"
+                        android:textColor="@android:color/white"
+                        android:paddingTop="8dp"
+                        android:paddingLeft="4dp"
+                        android:paddingRight="4dp"
+                        android:paddingBottom="8dp"
+                        android:gravity="center"
+                        android:background="@color/table_row_even"/>
+
+                    <TextView
+                        android:id="@+id/jonidanTotalTextView"
+                        android:layout_width="40dp"
+                        android:layout_height="wrap_content"
+                        android:textSize="14sp"
+                        android:textColor="@android:color/white"
+                        android:paddingTop="8dp"
+                        android:paddingLeft="4dp"
+                        android:paddingRight="4dp"
+                        android:paddingBottom="8dp"
+                        android:gravity="center"
+                        android:background="@color/table_row_odd"/>
+
+                    <TextView
+                        android:id="@+id/jonokuchiTotalTextView"
+                        android:layout_width="40dp"
+                        android:layout_height="wrap_content"
+                        android:textSize="14sp"
+                        android:textColor="@android:color/white"
+                        android:paddingTop="8dp"
+                        android:paddingLeft="4dp"
+                        android:paddingRight="4dp"
+                        android:paddingBottom="8dp"
+                        android:gravity="center"
+                        android:background="@color/table_row_even"/>
+
+                    <!-- Add more division total TextViews as needed -->
+                </LinearLayout>
+            </LinearLayout>
+        </HorizontalScrollView>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="12dp">
+
+            <TextView
+                android:id="@+id/totalWinsTextView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textSize="20sp"
+                android:gravity="center"
+                android:textColor="@android:color/white"/>
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/sanshoTitleTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/special_prizes"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/white"
+            android:gravity="center"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="8dp"
+            android:visibility="gone"/>
+
+        <LinearLayout
+            android:id="@+id/sanshoContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/ginoShoTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:textColor="@android:color/white"
+                android:layout_marginEnd="8dp"/>
+
+            <TextView
+                android:id="@+id/kantoShoTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:textColor="@android:color/white"
+                android:layout_marginEnd="8dp"/>
+
+            <TextView
+                android:id="@+id/shukunShoTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:textColor="@android:color/white"/>
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/dohyo"
+        android:icon="@drawable/dohyo"
+        android:title="@string/basho" />
+
+    <item
+        android:id="@+id/search"
+        android:icon="@drawable/chonmage"
+        android:title="@string/search" />
+
+    <item
+        android:id="@+id/favourites"
+        android:icon="@drawable/favourites"
+        android:title="@string/favourites" />
+
+    <item
+        android:id="@+id/oneonone"
+        android:icon="@drawable/pictogram"
+        android:title="@string/versus" />
+
+    <item
+        android:id="@+id/settings"
+        android:icon="@drawable/settings"
+        android:title="@string/settings" />
+
+</menu>

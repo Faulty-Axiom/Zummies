@@ -1,0 +1,338 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/fragmentFirst"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".first_fragment.FirstFragment">
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop"
+        android:src="@drawable/takahanada" />
+
+
+    <!-- Main content in a vertical LinearLayout -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <!-- Top bar with buttons and number selector -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@color/bottom_top_colour"
+            android:paddingLeft="8dp"
+            android:paddingRight="8dp">
+
+            <!-- Buttons row -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:layout_marginBottom="8dp">
+
+                <!-- Year button -->
+                <TextView
+                    android:id="@+id/yearButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/select_year"
+                    android:background="@drawable/button_background_rounded"
+                    android:foreground="@drawable/rounded_button_ripple"
+                    android:stateListAnimator="@null"
+                    android:gravity="center"
+                    android:padding="12dp"
+                    android:textColor="@android:color/white"
+                    android:textSize="16sp"
+                    android:layout_marginEnd="8dp"
+                    android:elevation="4dp"
+                    android:clickable="true"
+                    android:focusable="true" />
+
+                <!-- Month button -->
+                <TextView
+                    android:id="@+id/monthButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/select_month"
+                    android:background="@drawable/button_background_rounded"
+                    android:foreground="@drawable/rounded_button_ripple"
+                    android:stateListAnimator="@null"
+                    android:gravity="center"
+                    android:padding="12dp"
+                    android:textColor="@android:color/white"
+                    android:textSize="16sp"
+                    android:layout_marginEnd="8dp"
+                    android:elevation="4dp"
+                    android:clickable="true"
+                    android:focusable="true" />
+
+                <!-- Division button -->
+                <TextView
+                    android:id="@+id/divisionButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/select_division"
+                    android:background="@drawable/button_background_rounded"
+                    android:foreground="@drawable/rounded_button_ripple"
+                    android:stateListAnimator="@null"
+                    android:gravity="center"
+                    android:padding="12dp"
+                    android:textColor="@android:color/white"
+                    android:textSize="16sp"
+                    android:elevation="4dp"
+                    android:clickable="true"
+                    android:focusable="true" />
+            </LinearLayout>
+
+            <!-- Number selector -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/numberRecyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="8dp" />
+        </LinearLayout>
+
+        <!-- Basho Winner -->
+        <LinearLayout
+            android:id="@+id/bashoWinnersContainer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/button_background_rounded"
+            android:layout_margin="20dp"
+            android:padding="12dp"
+            android:visibility="visible">
+
+            <!-- Winners Header with Underline -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingTop="16dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/winners"
+                    android:textSize="26sp"
+                    android:textColor="@android:color/white"
+                    android:textStyle="bold"
+                    android:gravity="center"
+                    android:paddingBottom="8dp"/>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="2dp"
+                    android:background="@android:color/white"/>
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/bashoWinnersList"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="20sp"
+                android:textColor="@android:color/white"
+                android:gravity="center"
+                android:padding="16dp"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/special_prizes"
+                android:textSize="26sp"
+                android:textColor="@android:color/white"
+                android:textStyle="bold"
+                android:gravity="center"
+                android:paddingBottom="8dp"
+                android:layout_marginTop="12dp" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="2dp"
+                android:background="@android:color/white"
+                android:layout_marginBottom="8dp"/>
+
+            <TextView
+                android:id="@+id/bashoSpecialPrizesList"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="20sp"
+                android:textColor="@android:color/white"
+                android:gravity="center"
+                android:padding="8dp"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/banzukeContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <!-- Banzuke Title layout -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:background="@color/darker_black"
+                android:padding="8dp"
+                android:elevation="8dp">
+
+                <!-- East title -->
+                <TextView
+                    android:id="@+id/titleEast"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/east"
+                    android:textSize="20sp"
+                    android:textColor="@android:color/white"
+                    android:textStyle="bold"
+                    android:gravity="center"
+                    android:layout_marginLeft="7sp"/>
+
+                <!-- West title -->
+                <TextView
+                    android:id="@+id/titleWest"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/west"
+                    android:textSize="20sp"
+                    android:textColor="@android:color/white"
+                    android:textStyle="bold"
+                    android:gravity="center"
+                    android:layout_marginRight="7sp"/>
+            </LinearLayout>
+
+            <!-- Banzuke RecyclerView -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/banzukeRecyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="106dp"
+                android:padding="8dp"
+                tools:listitem="@layout/item_banzuke_row" />
+        </LinearLayout>
+
+        <!-- Torikumi Container (only visible when showing torikumi) -->
+        <LinearLayout
+            android:id="@+id/torikumiContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <!-- Title layout -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:background="@color/darker_black"
+                android:padding="8dp"
+                android:elevation="8dp">
+
+                <!-- Left Rikishi title (aligned to start) -->
+                <TextView
+                    android:id="@+id/titleRikishiLeft"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/rikishi"
+                    android:textSize="20sp"
+                    android:textColor="@android:color/white"
+                    android:textStyle="bold"
+                    android:gravity="center" />
+
+                <!-- Torikumi title (centered) -->
+                <TextView
+                    android:id="@+id/titleTorikumi"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/kimarite"
+                    android:textSize="20sp"
+                    android:textColor="@android:color/white"
+                    android:textStyle="bold"
+                    android:gravity="center"
+                    android:layout_marginEnd="70dp"
+                    android:layout_marginStart="70dp"/>
+
+                <!-- Right Rikishi title (aligned to end) -->
+                <TextView
+                    android:id="@+id/titleRikishiRight"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/rikishi"
+                    android:textSize="20sp"
+                    android:textColor="@android:color/white"
+                    android:textStyle="bold"
+                    android:gravity="center" />
+            </LinearLayout>
+
+            <!-- Torikumi RecyclerView -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/torikumiRecyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="106dp"
+                android:padding="8dp"
+                tools:listitem="@layout/item_torikumi_row" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <View
+        android:id="@+id/overlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#80000000"
+        android:visibility="gone"
+        android:clickable="true"/>
+
+    <!-- Overlaid popup RecyclerViews -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/yearRecyclerView"
+        android:layout_width="300dp"
+        android:layout_height="250dp"
+        android:visibility="gone"
+        android:background="@color/darker_black"
+        android:layout_gravity="center"
+        android:elevation="12dp"
+        android:layout_marginTop="40dp"/>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/monthRecyclerView"
+        android:layout_width="300dp"
+        android:layout_height="250dp"
+        android:visibility="gone"
+        android:background="@color/darker_black"
+        android:layout_gravity="center"
+        android:elevation="12dp"
+        android:layout_marginTop="40dp"/>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/divisionRecyclerView"
+        android:layout_width="300dp"
+        android:layout_height="250dp"
+        android:visibility="gone"
+        android:background="@color/darker_black"
+        android:layout_gravity="center"
+        android:elevation="12dp"
+        android:layout_marginTop="40dp" />
+</FrameLayout>

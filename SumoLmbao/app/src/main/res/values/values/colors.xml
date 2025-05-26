@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="dark_gray">#2C2C2C</color>
+    <color name="darker_black">#1A1A1A</color>
+
+    <color name="button_light_red">#E53935</color>
+    <color name="button_ripple_yellow">#40FFEB3B</color>
+    <color name="button_dark_red">#640f0d</color>
+    <color name="selectedGrey">#c4c4c4</color>
+    <color name="bottom_top_colour">#1F1F22</color>
+    <color name="darker_white">#070a07</color>
+</resources>

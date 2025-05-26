@@ -1,0 +1,44 @@
+<resources>
+    <string name="app_name">Sumo App</string>
+    <string name="search">Search</string>
+    <string name="basho">Basho</string>
+    <string name="settings">Settings</string>
+    <string name="banzuke">Banzuke</string>
+    <string name="favourites">Favourites</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="select_a_basho">Basho Winner</string>
+    <string name="select_month">Month</string>
+    <string name="select_year">Year</string>
+    <string name="select_division">Division</string>
+    <string name="number_content_description">Number %1$d</string>
+    <string name="arrow_left"><![CDATA[<]]></string>
+    <string name="arrow_right"><![CDATA[>]]></string>
+    <string name="winners">Winners</string>
+    <string name="special_prizes">Special Prizes (Sanshō)</string>
+    <string name="loading">Loading...</string>
+    <string name="search_rikishi">Search for a rikishi</string>
+    <string name="yusho_titles">Yusho (Titles)</string>
+    <string name="division">Division</string>
+    <string name="career">Career</string>
+    <string name="makuuchi">Makuuchi</string>
+    <string name="juryo">Juryo</string>
+    <string name="makushita">Makushita</string>
+    <string name="sandanme">Sandanme</string>
+    <string name="jonidan">Jonidan</string>
+    <string name="jonokuchi">Jonokuchi</string>
+    <string name="division_statistics">Division Statistics</string>
+    <string name="losses">Losses</string>
+    <string name="wins">Wins</string>
+    <string name="yusho">Yusho</string>
+    <string name="total">Total</string>
+    <string name="rikishi">Rikishi</string>
+    <string name="torikumi">Torikumi</string>
+    <string name="kimarite">Kimarite</string>
+    <string name="east">East</string>
+    <string name="west">West</string>
+    <string name="versus">Versus</string>
+    <string name="rikishi_meaning">Sumo wrestler</string>
+    <string name="kimarite_meaning">Winning technique</string>
+    <string name="rikishi_image">Rikishi Image</string>
+</resources>
