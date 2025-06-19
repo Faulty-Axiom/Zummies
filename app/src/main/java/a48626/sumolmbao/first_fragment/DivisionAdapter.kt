@@ -17,10 +17,10 @@ class DivisionAdapter(
     inner class DivisionViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val textContainer: View = itemView.findViewById(R.id.textContainer)
         val divisionText: TextView = itemView.findViewById(R.id.itemText)
+        private val divider: View = itemView.findViewById(R.id.divider) // Add this
 
         @SuppressLint("SetTextI18n")
-        fun bind(division: String, position: Int) {
-            // Show full label (e.g., "1st Division: Makuuchi")
+        fun bind(division: String, position: Int, isLast: Boolean) { // Add isLast
             val displayText = if (division != "Division") {
                 val ordinalPrefix = when (position) {
                     1 -> "1st"
@@ -37,10 +37,10 @@ class DivisionAdapter(
             }
 
             divisionText.text = displayText
+            divider.visibility = if (isLast) View.GONE else View.VISIBLE // Hide if last
 
-            // Set up click listener to pass raw division name and dismiss
             textContainer.setOnClickListener {
-                onDivisionSelected(division) // Only raw name is passed back
+                onDivisionSelected(division)
                 onDismiss()
             }
         }
@@ -53,7 +53,8 @@ class DivisionAdapter(
     }
 
     override fun onBindViewHolder(holder: DivisionViewHolder, position: Int) {
-        holder.bind(divisions[position], position)
+        val isLast = position == divisions.size - 1 // Check if it's the last item
+        holder.bind(divisions[position], position, isLast)
     }
 
     override fun getItemCount(): Int = divisions.size

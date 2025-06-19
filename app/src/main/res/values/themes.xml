@@ -1,10 +1,27 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
     <style name="Base.Theme.SumoApp" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
         <item name="android:selectableItemBackgroundBorderless">@drawable/button_background_rounded</item>
     </style>
 
     <style name="Theme.SumoApp" parent="Base.Theme.SumoApp" />
+
+    <style name="RedTheme" parent="Theme.SumoApp">
+        <item name="buttonBackgroundColor">@color/button_dark_red</item>
+    </style>
+
+    <style name="PurpleTheme" parent="Theme.SumoApp">
+        <item name="buttonBackgroundColor">@color/button_purple</item>
+    </style>
+
+    <style name="GreenTheme" parent="Theme.SumoApp">
+        <item name="buttonBackgroundColor">@color/button_green</item>
+    </style>
+
+    <style name="BlueTheme" parent="Theme.SumoApp">
+        <item name="buttonBackgroundColor">@color/button_blue</item>
+    </style>
+
+    <style name="JsaTheme" parent="Theme.SumoApp">
+        <item name="buttonBackgroundColor">@color/button_jsa</item>
+    </style>
 </resources>

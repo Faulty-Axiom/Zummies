@@ -1,9 +1,11 @@
 package a48626.sumolmbao
 
+import a48626.sumolmbao.fifth_fragment.FifthFragment
 import a48626.sumolmbao.first_fragment.FirstFragment
 import a48626.sumolmbao.fourth_fragment.FourthFragment
 import a48626.sumolmbao.third_fragment.SumoApplication
 import a48626.sumolmbao.third_fragment.ThirdFragment
+import android.content.Context
 import android.os.Bundle
 import android.view.View
 import android.view.WindowManager
@@ -13,8 +15,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.fragment.app.Fragment
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -27,6 +29,16 @@ class MainActivity : AppCompatActivity()
 
     override fun onCreate(savedInstanceState: Bundle?)
     {
+        // Apply the saved theme
+        val sharedPreferences = getSharedPreferences("ThemePrefs", Context.MODE_PRIVATE)
+        when (sharedPreferences.getString("SelectedTheme", "RedTheme")) {
+            "PurpleTheme" -> setTheme(R.style.PurpleTheme)
+            "GreenTheme" -> setTheme(R.style.GreenTheme)
+            "BlueTheme" -> setTheme(R.style.BlueTheme)
+            "JsaTheme" -> setTheme(R.style.JsaTheme)
+            else -> setTheme(R.style.RedTheme)
+        }
+
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
@@ -54,7 +66,6 @@ class MainActivity : AppCompatActivity()
         val fifthFragment = FifthFragment()
 
         setCurrentFragment(secondFragment)
-        bottomNavigationView.selectedItemId = R.id.favourites
 
         bottomNavigationView.setOnNavigationItemSelectedListener{
             when (it.itemId)
@@ -98,6 +109,7 @@ class MainActivity : AppCompatActivity()
             runOnUiThread {
                 loadingOverlay.visibility = View.GONE
                 bottomNavigationView.visibility = View.VISIBLE
+                bottomNavigationView.selectedItemId = R.id.favourites
             }
         }
     }

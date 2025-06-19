@@ -14,4 +14,8 @@
     <color name="table_row_even">#905D5C</color>
     <color name="table_row_odd">#9E6867</color>
     <color name="table_header">#613F3E</color>
+    <color name="button_purple">#53445e</color>
+    <color name="button_green">#FF4CAF50</color>
+    <color name="button_blue">#FF2196F3</color>
+    <color name="button_jsa">#e1a0c0</color>
 </resources>

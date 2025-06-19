@@ -314,7 +314,7 @@
         android:background="@color/darker_black"
         android:layout_gravity="center"
         android:elevation="12dp"
-        android:layout_marginTop="40dp"/>
+        android:layout_marginBottom="30dp"/>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/monthRecyclerView"
@@ -324,7 +324,7 @@
         android:background="@color/darker_black"
         android:layout_gravity="center"
         android:elevation="12dp"
-        android:layout_marginTop="40dp"/>
+        android:layout_marginBottom="30dp"/>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/divisionRecyclerView"
@@ -334,5 +334,5 @@
         android:background="@color/darker_black"
         android:layout_gravity="center"
         android:elevation="12dp"
-        android:layout_marginTop="40dp" />
+        android:layout_marginBottom="30dp"/>
 </FrameLayout>

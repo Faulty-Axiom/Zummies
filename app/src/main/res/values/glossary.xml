@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="glossary_terms">
+        <item>Rikishi|A professional Sumo wrestler.</item>
+        <item>Banzuke|The official ranking list of Sumo wrestlers, published before each grand tournament.</item>
+        <item>Kimarite|The winning technique used to end a Sumo match. There are over 82 official kimarite.</item>
+        <item>Dohyo|The ring in which Sumo bouts are held. It is made of a specific type of clay and covered in a layer of sand.</item>
+        <item>Mawashi|The loincloth worn by rikishi during practice and competition.</item>
+        <item>Heya|A Sumo stable or "beya," where wrestlers live, train, and eat together.</item>
+        <item>Ozeki|The second-highest rank in Sumo, below Yokozuna.</item>
+        <item>Yokozuna|The highest rank a rikishi can achieve. Once promoted, a Yokozuna cannot be demoted.</item>
+        <item>Basho|A grand Sumo tournament. There are six official basho held each year.</item>
+        <item>Torikumi|A schedule of bouts for a particular day of a tournament.</item>
+    </string-array>
+</resources>

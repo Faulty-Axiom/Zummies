@@ -16,13 +16,15 @@ class YearMonthAdapter(
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val textContainer: View = itemView.findViewById(R.id.textContainer)
         val itemText: TextView = itemView.findViewById(R.id.itemText)
+        private val divider: View = itemView.findViewById(R.id.divider) // Add this
 
-        fun bind(item: String) {
+        fun bind(item: String, isLast: Boolean) { // Add isLast parameter
             itemText.text = item
             itemView.setOnClickListener {
                 onItemClick(item)
                 onDismiss() // Call dismiss when item is clicked
             }
+            divider.visibility = if (isLast) View.GONE else View.VISIBLE // Hide if last
         }
     }
 
@@ -32,7 +34,8 @@ class YearMonthAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(items[position])
+        val isLast = position == items.size - 1 // Check if it's the last item
+        holder.bind(items[position], isLast)
     }
 
     override fun getItemCount(): Int = items.size

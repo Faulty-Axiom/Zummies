@@ -37,6 +37,12 @@ android {
     buildFeatures {
         viewBinding = true
     }
+
+    sourceSets {
+        getByName("main") {
+            res.srcDirs("src/main/themePacks")
+        }
+    }
 }
 
 dependencies {
