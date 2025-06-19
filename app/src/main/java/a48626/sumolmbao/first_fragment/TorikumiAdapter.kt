@@ -12,8 +12,6 @@ import androidx.recyclerview.widget.RecyclerView
 class TorikumiAdapter(private val torikumiList: List<Torikumi>) :
     RecyclerView.Adapter<TorikumiAdapter.TorikumiViewHolder>() {
 
-    var onTechniqueClickListener: ((String, View) -> Unit)? = null
-
     class TorikumiViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val eastShikona: TextView = view.findViewById(R.id.eastShikona)
         val eastRank: TextView = view.findViewById(R.id.eastRank)
@@ -51,13 +49,13 @@ class TorikumiAdapter(private val torikumiList: List<Torikumi>) :
         holder.westCircle.setBackgroundResource(
             if (!eastIsWinner) R.drawable.circle_winner else R.drawable.circle_loser
         )
-
-        holder.technique.setOnClickListener {
-            onTechniqueClickListener?.invoke(kimarite, holder.technique)
-        }
     }
 
     override fun getItemCount() = torikumiList.size
+
+    fun getKimariteAt(position: Int): String {
+        return torikumiList[position].kimarite.replaceFirstChar { it.uppercase() }
+    }
 
     private fun convertRankToShort(rank: String): String {
         val regex = Regex("""(Yokozuna|Ozeki|Sekiwake|Komusubi|Maegashira|Juryo|Makushita|Sandanme|Jonidan|Jonokuchi)\s*(\d*)\s*(East|West)""", RegexOption.IGNORE_CASE)

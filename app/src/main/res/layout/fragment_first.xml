@@ -13,13 +13,11 @@
         android:src="@drawable/takahanada" />
 
 
-    <!-- Main content in a vertical LinearLayout -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <!-- Top bar with buttons and number selector -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -28,7 +26,6 @@
             android:paddingLeft="8dp"
             android:paddingRight="8dp">
 
-            <!-- Buttons row -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -36,7 +33,6 @@
                 android:gravity="center"
                 android:layout_marginBottom="8dp">
 
-                <!-- Year button -->
                 <TextView
                     android:id="@+id/yearButton"
                     android:layout_width="0dp"
@@ -55,7 +51,6 @@
                     android:clickable="true"
                     android:focusable="true" />
 
-                <!-- Month button -->
                 <TextView
                     android:id="@+id/monthButton"
                     android:layout_width="0dp"
@@ -74,7 +69,6 @@
                     android:clickable="true"
                     android:focusable="true" />
 
-                <!-- Division button -->
                 <TextView
                     android:id="@+id/divisionButton"
                     android:layout_width="0dp"
@@ -93,7 +87,6 @@
                     android:focusable="true" />
             </LinearLayout>
 
-            <!-- Number selector -->
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/numberRecyclerView"
                 android:layout_width="match_parent"
@@ -101,7 +94,6 @@
                 android:paddingHorizontal="8dp" />
         </LinearLayout>
 
-        <!-- Basho Winner -->
         <LinearLayout
             android:id="@+id/bashoWinnersContainer"
             android:layout_width="wrap_content"
@@ -112,7 +104,6 @@
             android:padding="12dp"
             android:visibility="visible">
 
-            <!-- Winners Header with Underline -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -179,7 +170,6 @@
             android:orientation="vertical"
             android:visibility="gone">
 
-            <!-- Banzuke Title layout -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -189,7 +179,6 @@
                 android:padding="8dp"
                 android:elevation="8dp">
 
-                <!-- East title -->
                 <TextView
                     android:id="@+id/titleEast"
                     android:layout_width="0dp"
@@ -202,7 +191,6 @@
                     android:gravity="center"
                     android:layout_marginLeft="7sp"/>
 
-                <!-- West title -->
                 <TextView
                     android:id="@+id/titleWest"
                     android:layout_width="0dp"
@@ -216,7 +204,6 @@
                     android:layout_marginRight="7sp"/>
             </LinearLayout>
 
-            <!-- Banzuke RecyclerView -->
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/banzukeRecyclerView"
                 android:layout_width="match_parent"
@@ -228,15 +215,15 @@
                 tools:listitem="@layout/item_banzuke_row" />
         </LinearLayout>
 
-        <!-- Torikumi Container (only visible when showing torikumi) -->
         <LinearLayout
             android:id="@+id/torikumiContainer"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:orientation="vertical"
-            android:visibility="gone">
+            android:visibility="gone"
+            android:clickable="true"
+            android:focusable="true">
 
-            <!-- Title layout -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -246,7 +233,6 @@
                 android:padding="8dp"
                 android:elevation="8dp">
 
-                <!-- Left Rikishi title (aligned to start) -->
                 <TextView
                     android:id="@+id/titleRikishiLeft"
                     android:layout_width="0dp"
@@ -258,7 +244,6 @@
                     android:textStyle="bold"
                     android:gravity="center" />
 
-                <!-- Torikumi title (centered) -->
                 <TextView
                     android:id="@+id/titleTorikumi"
                     android:layout_width="wrap_content"
@@ -271,7 +256,6 @@
                     android:layout_marginEnd="70dp"
                     android:layout_marginStart="70dp"/>
 
-                <!-- Right Rikishi title (aligned to end) -->
                 <TextView
                     android:id="@+id/titleRikishiRight"
                     android:layout_width="0dp"
@@ -284,7 +268,6 @@
                     android:gravity="center" />
             </LinearLayout>
 
-            <!-- Torikumi RecyclerView -->
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/torikumiRecyclerView"
                 android:layout_width="match_parent"
@@ -305,7 +288,6 @@
         android:visibility="gone"
         android:clickable="true"/>
 
-    <!-- Overlaid popup RecyclerViews -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/yearRecyclerView"
         android:layout_width="300dp"

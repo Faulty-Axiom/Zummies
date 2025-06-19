@@ -10,11 +10,14 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
-import android.view.Gravity
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
+import android.view.ViewConfiguration
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -25,13 +28,13 @@ import retrofit2.Response
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.LinearLayout
-import androidx.core.content.ContextCompat
 import androidx.core.view.isGone
 import java.util.Calendar
 import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.core.content.edit
 import androidx.core.view.isVisible
 import kotlin.collections.get
+import kotlin.math.abs
 
 class FirstFragment : Fragment() {
 
@@ -61,8 +64,13 @@ class FirstFragment : Fragment() {
     private lateinit var torikumiContainer: LinearLayout
     private lateinit var banzukeContainer: LinearLayout
 
-    private var tooltipView: TextView? = null
-    private var isTooltipShowing = false
+    private var originalTexts = mutableMapOf<TextView, CharSequence>()
+
+    // For press-and-hold with delay and scroll lock
+    private val handler = Handler(Looper.getMainLooper())
+    private var translationRunnable: Runnable? = null
+    private var isTranslationLocked = false
+    private var touchSlop: Int = 0
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -71,11 +79,12 @@ class FirstFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_first, container, false)
     }
 
-    @SuppressLint("SetTextI18n", "CutPasteId")
+    @SuppressLint("SetTextI18n", "CutPasteId", "ClickableViewAccessibility")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         sharedPreferences = requireContext().getSharedPreferences("UserSelections", Context.MODE_PRIVATE)
+        touchSlop = ViewConfiguration.get(requireContext()).scaledTouchSlop
 
         yearButton = view.findViewById(R.id.yearButton)
         monthButton = view.findViewById(R.id.monthButton)
@@ -97,6 +106,65 @@ class FirstFragment : Fragment() {
         torikumiContainer = view.findViewById(R.id.torikumiContainer)
         banzukeContainer = view.findViewById(R.id.banzukeContainer)
 
+        // --- START OF NEW TOUCH LOGIC ---
+
+        torikumiRecyclerView.addOnItemTouchListener(object : RecyclerView.OnItemTouchListener {
+            private var downX = 0f
+            private var downY = 0f
+
+            // This runnable will trigger the translation and lock
+            private val translationRunnable = Runnable {
+                isTranslationLocked = true
+                translateAllKimarite(true)
+            }
+
+            override fun onInterceptTouchEvent(rv: RecyclerView, e: MotionEvent): Boolean {
+                // This method decides if we should "steal" the touch event from the RecyclerView.
+                // We only steal it if the translation is already locked.
+
+                if (isTranslationLocked) {
+                    // If we are already locked, we must continue to intercept events.
+                    return true
+                }
+
+                when (e.action) {
+                    MotionEvent.ACTION_DOWN -> {
+                        downX = e.x
+                        downY = e.y
+                        handler.postDelayed(translationRunnable, 300)
+                    }
+                    MotionEvent.ACTION_MOVE -> {
+                        if (abs(e.x - downX) > touchSlop || abs(e.y - downY) > touchSlop) {
+                            handler.removeCallbacks(translationRunnable)
+                        }
+                    }
+                    MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                        handler.removeCallbacks(translationRunnable)
+                    }
+                }
+
+                // By default, do NOT intercept. This allows the RecyclerView to scroll.
+                return false
+            }
+
+            override fun onTouchEvent(rv: RecyclerView, e: MotionEvent) {
+                // This method is only called if onInterceptTouchEvent returned true,
+                // meaning we are in a "locked" state. We just need to handle the release.
+                if (e.action == MotionEvent.ACTION_UP || e.action == MotionEvent.ACTION_CANCEL) {
+                    translateAllKimarite(false)
+                    isTranslationLocked = false
+                }
+            }
+
+            override fun onRequestDisallowInterceptTouchEvent(disallowIntercept: Boolean) {
+                if (disallowIntercept) {
+                    handler.removeCallbacks(translationRunnable)
+                }
+            }
+        })
+
+        // --- END OF NEW TOUCH LOGIC ---
+
         overlay.setOnClickListener {
             hideRecyclerViewWithAnimation(yearRecyclerView)
             hideRecyclerViewWithAnimation(monthRecyclerView)
@@ -105,22 +173,16 @@ class FirstFragment : Fragment() {
         }
 
         val currentYear = Calendar.getInstance().get(Calendar.YEAR)
-
-        // Vai buscar as seleções previamente feitas
         selectedYear = sharedPreferences.getInt("selectedYear", -1).takeIf { it != -1 }
         selectedMonth = sharedPreferences.getInt("selectedMonth", -1).takeIf { it != -1 }
         selectedDivision = sharedPreferences.getString("selectedDivision", null)
         selectedDay = sharedPreferences.getInt("selectedDay", -1).takeIf { it != -1 }
-
         yearButton.text = selectedYear?.toString() ?: "Year"
         monthButton.text = selectedMonth?.let { monthNames[it] } ?: "Month"
         divisionButton.text = selectedDivision ?: "Division"
-
         if (selectedYear == null || selectedMonth == null) {
             bashoWinnersContainer.visibility = View.GONE
         }
-
-        // Atualiza o UI
         if (selectedYear != null) {
             yearButton.text = "$selectedYear"
         }
@@ -172,8 +234,6 @@ class FirstFragment : Fragment() {
         )
         yearRecyclerView.adapter = yearAdapter
         yearRecyclerView.layoutManager = LinearLayoutManager(requireContext())
-
-        // Setup months RecyclerView
         val months = listOf("Month") + listOf(1, 3, 5, 7, 9, 11)
         val monthAdapter = YearMonthAdapter(
             items = months.map { if (it is Int) monthNames[it] ?: "" else it.toString() },
@@ -198,8 +258,6 @@ class FirstFragment : Fragment() {
         )
         monthRecyclerView.adapter = monthAdapter
         monthRecyclerView.layoutManager = LinearLayoutManager(requireContext())
-
-        // Setup divisions RecyclerView
         val divisions = listOf("Division", "Makuuchi", "Juryo", "Makushita", "Sandanme", "Jonidan", "Jonokuchi")
         val divisionAdapter = DivisionAdapter(
             divisions = divisions,
@@ -224,10 +282,7 @@ class FirstFragment : Fragment() {
         )
         divisionRecyclerView.adapter = divisionAdapter
         divisionRecyclerView.layoutManager = LinearLayoutManager(requireContext())
-
         val numbers = (1..15).toList()
-
-        // Group into pages of 5 numbers each
         val numberPages = numbers.chunked(5)
 
         sharedPreferences = requireContext().getSharedPreferences("UserSelections", Context.MODE_PRIVATE)
@@ -247,8 +302,6 @@ class FirstFragment : Fragment() {
 
         val snapHelper = PagerSnapHelper()
         snapHelper.attachToRecyclerView(numberRecyclerView)
-
-        // Set initial state for first page
         numberRecyclerView.post {
             val layoutManager = numberRecyclerView.layoutManager as LinearLayoutManager
             val firstVisiblePosition = layoutManager.findFirstVisibleItemPosition()
@@ -263,7 +316,6 @@ class FirstFragment : Fragment() {
                 when (newState) {
                     RecyclerView.SCROLL_STATE_DRAGGING,
                     RecyclerView.SCROLL_STATE_SETTLING -> {
-                        // Hide arrows during scrolling
                         val firstVisible = layoutManager.findFirstVisibleItemPosition()
                         adapter?.getViewHolderAt(firstVisible)?.let { viewHolder ->
                             viewHolder.leftArrow.visibility = View.GONE
@@ -271,7 +323,6 @@ class FirstFragment : Fragment() {
                         }
                     }
                     RecyclerView.SCROLL_STATE_IDLE -> {
-                        // Show arrows according to position when scrolling stops
                         val snappedView = snapHelper.findSnapView(layoutManager)
                         val snappedPosition = snappedView?.let { layoutManager.getPosition(it) } ?: return
 
@@ -283,12 +334,8 @@ class FirstFragment : Fragment() {
                 }
             }
         })
-
-        // Handle Year Button click
         yearButton.setOnClickListener {
             animateButtonClick(it)
-
-            // Hide divisionRecyclerView if it's visible
             if (divisionRecyclerView.isVisible) {
                 hideRecyclerViewWithAnimation(divisionRecyclerView)
             }
@@ -308,12 +355,8 @@ class FirstFragment : Fragment() {
                 overlay.visibility = View.GONE
             }
         }
-
-        // Handle Month Button click
         monthButton.setOnClickListener {
             animateButtonClick(it)
-
-            // Hide divisionRecyclerView if it's visible
             if (divisionRecyclerView.isVisible) {
                 hideRecyclerViewWithAnimation(divisionRecyclerView)
             }
@@ -333,8 +376,6 @@ class FirstFragment : Fragment() {
                 overlay.visibility = View.GONE
             }
         }
-
-        // Handle Division Button click
         divisionButton.setOnClickListener {
             animateButtonClick(it)
 
@@ -362,101 +403,42 @@ class FirstFragment : Fragment() {
             fetchSpecificCall()
             saveLastApiCallParams()
         }
-        setupTooltips()
     }
 
-    private fun Int.dpToPx(): Int = (this * resources.displayMetrics.density).toInt()
+    private fun translateAllKimarite(translate: Boolean) {
+        val torikumiAdapter = torikumiRecyclerView.adapter as? TorikumiAdapter ?: return
 
-    private fun setupTooltips() {
-        val titleRikishiLeft = view?.findViewById<TextView>(R.id.titleRikishiLeft)
-        val titleTorikumi = view?.findViewById<TextView>(R.id.titleTorikumi)
-        val titleRikishiRight = view?.findViewById<TextView>(R.id.titleRikishiRight)
-        val overlay = view?.findViewById<View>(R.id.overlay)
-
-        tooltipView = TextView(requireContext()).apply {
-            layoutParams = ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.WRAP_CONTENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT
-            )
-            setBackgroundResource(R.drawable.tooltip_background)
-            setTextColor(ContextCompat.getColor(requireContext(), android.R.color.white))
-            setPadding(16.dpToPx(), 8.dpToPx(), 16.dpToPx(), 8.dpToPx())
-            elevation = 12f
-            gravity = Gravity.CENTER
-            visibility = View.GONE
-        }
-        (view as? ViewGroup)?.addView(tooltipView)
-
-        val clickListener = View.OnClickListener { v ->
-            when (v.id) {
-                R.id.titleRikishiLeft, R.id.titleRikishiRight -> {
-                    showTooltip(v, getString(R.string.rikishi_meaning))
-                }
-                R.id.titleTorikumi -> {
-                    showTooltip(v, getString(R.string.kimarite_meaning))
+        if (translate) {
+            for (i in 0 until torikumiAdapter.itemCount) {
+                val viewHolder = torikumiRecyclerView.findViewHolderForAdapterPosition(i) as? TorikumiAdapter.TorikumiViewHolder
+                if (viewHolder != null) {
+                    val kimarite = torikumiAdapter.getKimariteAt(i)
+                    if (!originalTexts.containsKey(viewHolder.technique)) {
+                        originalTexts[viewHolder.technique] = viewHolder.technique.text
+                    }
+                    viewHolder.technique.text = kimariteTranslations[kimarite] ?: kimarite
                 }
             }
-        }
-
-        titleRikishiLeft?.setOnClickListener(clickListener)
-        titleTorikumi?.setOnClickListener(clickListener)
-        titleRikishiRight?.setOnClickListener(clickListener)
-
-        overlay?.setOnClickListener {
-            if (isTooltipShowing) {
-                hideTooltip()
-            } else {
-                // Original behavior - hide all recycler views
-                hideRecyclerViewWithAnimation(yearRecyclerView)
-                hideRecyclerViewWithAnimation(monthRecyclerView)
-                hideRecyclerViewWithAnimation(divisionRecyclerView)
+        } else {
+            if (originalTexts.isNotEmpty()) {
+                for (i in 0 until torikumiAdapter.itemCount) {
+                    val viewHolder = torikumiRecyclerView.findViewHolderForAdapterPosition(i) as? TorikumiAdapter.TorikumiViewHolder
+                    if (viewHolder != null && originalTexts.containsKey(viewHolder.technique)) {
+                        viewHolder.technique.text = originalTexts[viewHolder.technique]
+                    }
+                }
+                originalTexts.clear()
             }
         }
-    }
-
-    private fun showTooltip(anchorView: View, text: String) {
-        if (isTooltipShowing) {
-            hideTooltip()
-            return
-        }
-
-        tooltipView?.apply {
-            textSize = 18f // Set your desired text size
-            maxWidth = (resources.displayMetrics.widthPixels * 0.8).toInt()
-            measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED)
-        }
-
-        tooltipView?.text = text
-        tooltipView?.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED)
-
-        val anchorLocation = IntArray(2)
-        anchorView.getLocationOnScreen(anchorLocation)
-
-        // Calculate position - centered above the clicked view
-        val x = anchorLocation[0] + (anchorView.width / 2) - (tooltipView?.measuredWidth ?: 0) / 2
-        val y = anchorLocation[1] - (tooltipView?.measuredHeight ?: 0) - 16
-
-        tooltipView?.x = x.toFloat()
-        tooltipView?.y = y.toFloat()
-        tooltipView?.visibility = View.VISIBLE
-
-        view?.findViewById<View>(R.id.overlay)?.visibility = View.VISIBLE
-        isTooltipShowing = true
-    }
-
-    private fun hideTooltip() {
-        tooltipView?.visibility = View.GONE
-        view?.findViewById<View>(R.id.overlay)?.visibility = View.GONE
-        isTooltipShowing = false
     }
 
     override fun onPause() {
         super.onPause()
-        // Cancel all animations to prevent leaks
         listOf(yearButton, monthButton, divisionButton, banzukeRecyclerView,
             bashoWinnersContainer, numberRecyclerView, torikumiRecyclerView).forEach {
             it.animate().cancel()
         }
+        translationRunnable?.let { handler.removeCallbacks(it) }
     }
 
     private fun updateNumberArrowsVisibility(position: Int) {
@@ -522,7 +504,6 @@ class FirstFragment : Fragment() {
 
     @SuppressLint("DefaultLocale")
     private fun fetchSpecificCall() {
-        // Hide all content views initially
         bashoWinnersContainer.visibility = View.GONE
         banzukeRecyclerView.visibility = View.GONE
         banzukeContainer.visibility = View.GONE
@@ -547,7 +528,6 @@ class FirstFragment : Fragment() {
             Log.d("API_CALL", "Making a new API call")
         }
 
-        // Control day selector visibility
         numberRecyclerView.visibility = if (selectedDivision != null && selectedDivision != "Division") {
             View.VISIBLE
         } else {
@@ -556,18 +536,15 @@ class FirstFragment : Fragment() {
 
         when {
             selectedDivision == null || selectedDivision == "Division" -> {
-                // Show basho winners
                 bashoWinnersContainer.visibility = View.VISIBLE
                 fetchBasho(bashoId)
             }
             selectedDay != null -> {
-                // Show torikumi
                 torikumiContainer.visibility = View.VISIBLE
                 torikumiRecyclerView.visibility = View.VISIBLE
                 fetchTorikumi(bashoId, selectedDivision!!, selectedDay!!)
             }
             else -> {
-                // Show banzuke
                 banzukeContainer.visibility = View.GONE
                 banzukeRecyclerView.visibility = View.VISIBLE
                 fetchBanzuke(bashoId, selectedDivision!!)
@@ -575,7 +552,6 @@ class FirstFragment : Fragment() {
         }
     }
 
-    // Update fetchBasho function:
     private fun fetchBasho(bashoId: String)
     {
         bashoWinnersContainer.visibility = View.VISIBLE
@@ -593,8 +569,6 @@ class FirstFragment : Fragment() {
                 if (response.isSuccessful)
                 {
                     val basho = response.body()
-
-                    // Process main winners (yusho)
                     val yushoList = basho?.yusho ?: emptyList()
                     val orderedDivisions = listOf(
                         "Makuuchi", "Juryo", "Makushita",
@@ -613,8 +587,6 @@ class FirstFragment : Fragment() {
                     }
 
                     bashoWinnersList.text = winnersText
-
-                    // Process special prizes
                     val specialPrizes = basho?.specialPrizes ?: emptyList()
                     val prizesText = if (specialPrizes.isNotEmpty())
                     {
@@ -658,35 +630,26 @@ class FirstFragment : Fragment() {
                     val pairedList = mutableListOf<BanzukeRow>()
 
                     val sanyakuRanks = listOf("Yokozuna", "Ozeki", "Sekiwake", "Komusubi")
-
-                    // Process each sanyaku rank type
                     sanyakuRanks.forEach { rankType ->
-                        // Get all wrestlers of this rank type, preserving original order
                         val rankWrestlers = (east + west)
                             .filter { it.rank.startsWith(rankType) }
                             .sortedWith(compareBy(
-                                // Sort by position number first
                                 { wrestler ->
                                     val parts = wrestler.rank.split(" ")
                                     parts.getOrNull(1)?.toIntOrNull() ?: 1
                                 },
-                                // Then sort East before West
                                 { it.side }
                             ))
-
-                        // Group by their position number (1, 2, etc.)
                         val grouped = rankWrestlers.groupBy { wrestler ->
                             val parts = wrestler.rank.split(" ")
                             parts.getOrNull(1)?.toIntOrNull() ?: 1
                         }
 
                         grouped.forEach { (positionNumber, wrestlers) ->
-                            // Find East and West wrestlers for this position
                             val eastWrestler = wrestlers.find { it.side == "East" }
                             val westWrestler = wrestlers.find { it.side == "West" }
 
                             when {
-                                // Case 1: Both East and West exist
                                 eastWrestler != null && westWrestler != null -> {
                                     pairedList.add(
                                         BanzukeRow(
@@ -698,7 +661,6 @@ class FirstFragment : Fragment() {
                                         )
                                     )
                                 }
-                                // Case 2: Only East exists
                                 eastWrestler != null -> {
                                     pairedList.add(
                                         BanzukeRow(
@@ -710,7 +672,6 @@ class FirstFragment : Fragment() {
                                         )
                                     )
                                 }
-                                // Case 3: Only West exists
                                 westWrestler != null -> {
                                     pairedList.add(
                                         BanzukeRow(
@@ -725,8 +686,6 @@ class FirstFragment : Fragment() {
                             }
                         }
                     }
-
-                    // Handle non-sanyaku ranks
                     val eastNonSanyaku = east.filterNot { it.rank.split(" ")[0] in sanyakuRanks }
                     val westNonSanyaku = west.filterNot { it.rank.split(" ")[0] in sanyakuRanks }
 
@@ -771,14 +730,7 @@ class FirstFragment : Fragment() {
                     val torikumiList = response.body()?.torikumi ?: emptyList()
                     val adapter = TorikumiAdapter(torikumiList)
 
-                    // Set up click listener for techniques
-                    adapter.onTechniqueClickListener = { kimarite, anchorView ->
-                        val translation = kimariteTranslations[kimarite] ?: "No translation available"
-                        showTooltip(anchorView, translation)
-                    }
-
                     torikumiRecyclerView.adapter = adapter
-                    // Explicitly manage visibility here upon success
                     torikumiContainer.visibility = View.VISIBLE
                     torikumiRecyclerView.visibility = View.VISIBLE
                     banzukeRecyclerView.visibility = View.GONE
@@ -792,7 +744,6 @@ class FirstFragment : Fragment() {
             }
             override fun onFailure(call: Call<TorikumiResponse>, t: Throwable) {
                 Log.e("TorikumiFetch", "Network failure: ${t.message}", t)
-                // Hide all containers on failure
                 torikumiContainer.visibility = View.GONE
                 torikumiRecyclerView.visibility = View.GONE
                 banzukeRecyclerView.visibility = View.GONE
@@ -811,7 +762,6 @@ class FirstFragment : Fragment() {
     private fun showRecyclerViewWithAnimation(view: RecyclerView)
     {
         overlay.visibility = View.VISIBLE
-        // Reset the view first to ensure animations work consistently
         view.visibility = View.INVISIBLE
         view.post {
             val animation = AnimationUtils.loadAnimation(requireContext(), R.anim.slide_down)
@@ -848,7 +798,6 @@ class FirstFragment : Fragment() {
         selectedDay = if (selectedDay == day) null else day
         (numberRecyclerView.adapter as? NumberAdapter)?.setSelectedDay(selectedDay)
 
-        // Save to SharedPreferences
         sharedPreferences.edit {
             if (selectedDay != null)
             {
@@ -870,79 +819,107 @@ class FirstFragment : Fragment() {
     }
 
     private val kimariteTranslations = mapOf(
-        "Oshidashi" to "Frontal push out",
-        "Tsukidashi" to "Frontal thrust out",
-        "Yorikiri" to "Frontal force out",
-        "Uwatenage" to "Overarm throw",
-        "Shitatenage" to "Underarm throw",
-        "Hatakikomi" to "Slap down",
-        "Hikiotoshi" to "Pull down",
-        "Tsukiotoshi" to "Thrust down",
-        "Okuridashi" to "Rear push out",
-        "Kotenage" to "Armlock throw",
-        "Abisetaoshi" to "Backward force down",
-        "Amiuchi" to "Fishing net throw",
-        "Ashitori" to "Leg grab",
-        "Chongake" to "Headlock throw",
-        "Fusen" to "Default win",
-        "Gasshohineri" to "Double hand twist",
-        "Hansoku" to "Disqualification",
-        "Harimanage" to "Backward twisting throw",
-        "Hikkake" to "Arm grabbing twist down",
-        "Ipponzeoi" to "One-armed shoulder throw",
-        "Isamiashi" to "Advancing foot",
-        "Izori" to "Backward body drop",
-        "Kakezori" to "Hooking backward body drop",
-        "Kawazugake" to "Frog technique",
-        "Kekaeshi" to "Kick over",
-        "Ketaguri" to "Tripping ankle",
-        "Kimedashi" to "Arm-barring force out",
-        "Kimetaoshi" to "Arm-barring force down",
-        "Kirikaeshi" to "Twist back",
-        "Koshikudake" to "Hip burst",
-        "Koshinage" to "Hip throw",
-        "Kubihineri" to "Neck twist",
-        "Kubinage" to "Neck throw",
-        "Makiotoshi" to "Wrap around throw down",
-        "Mitokorozeme" to "Triple attack",
-        "Nichonage" to "Two-handed throw",
-        "Nimaigeri" to "Double kicking backward",
-        "Okurigake" to "Rear hooking trip",
-        "Okurihikiotoshi" to "Rear pull down",
-        "Okurinage" to "Rear throw",
-        "Okuritaoshi" to "Rear body drop",
-        "Okuritsuridashi" to "Rear lift out",
-        "Okuritsuriotoshi" to "Rear lift down",
-        "Sabaori" to "Hip roll",
-        "Sakatottari" to "Reverse arm lock throw",
-        "Shitatedashinage" to "Under-shoulder throw",
-        "Shitatenage" to "Underarm throw",
-        "Shumokuzori" to "Corner drop",
-        "Sokubiotoshi" to "Leg trip down",
-        "Sotogake" to "Outer hook",
-        "Sotomuso" to "Outer thigh scoop",
-        "Sototasukizori" to "Outer reverse lift drop",
-        "Susoharai" to "Leg sweep",
-        "Susotori" to "Leg grab",
-        "Tasukizori" to "Lift drop",
-        "Tottari" to "Arm lock throw",
-        "Tsukaminage" to "Thrusting shoulder throw",
-        "Tsukidashi" to "Frontal thrust out",
-        "Tsukihiza" to "Thrusting knee",
-        "Tsukiotoshi" to "Thrust down",
-        "Tsukitaoshi" to "Thrust down",
-        "Tsumatori" to "Ankle pick",
-        "Uchigake" to "Inner hook",
-        "Uchimuso" to "Inner thigh scoop",
-        "Ushiromotare" to "Backward slip down",
-        "Utchari" to "Rear push out",
-        "Uwatedashinage" to "Over-shoulder throw",
-        "Uwatenage" to "Overarm throw",
-        "Watashikomi" to "Arm entanglement",
-        "Yaguranage" to "Post throw",
-        "Yobimodoshi" to "Pull back",
-        "Yorikiri" to "Frontal force out",
-        "Yoritaoshi" to "Frontal crush out",
-        "Zubuneri" to "Head twist"
+        // --- Basic Techniques ---
+        "Abisetaoshi" to "Backward Force Down",
+        "Oshidashi" to "Frontal Push Out",
+        "Oshitaoshi" to "Frontal Push Down",
+        "Tsukidashi" to "Frontal Thrust Out",
+        "Tsukitaoshi" to "Frontal Thrust Down",
+        "Yorikiri" to "Frontal Force Out",
+        "Yoritaoshi" to "Frontal Crush Out",
+
+        // --- Leg Tripping Techniques ---
+        "Ashitori" to "Leg Pick",
+        "Chongake" to "Pulling Heel Hook",
+        "Kawazugake" to "Hooking Backward Counter Throw",
+        "Kekaeshi" to "Minor Inner Foot Sweep",
+        "Ketaguri" to "Pulling Inside Ankle Sweep",
+        "Kirikaeshi" to "Twisting Backward Knee Trip",
+        "Komatasukui" to "Over Thigh Scooping Body Drop",
+        "Kozumatori" to "Ankle Pick",
+        "Mitokorozeme" to "Triple-Attack Force Out",
+        "Nimaigeri" to "Ankle Kicking Twist Down",
+        "Omata" to "Thigh Scooping Body Drop",
+        "Sotogake" to "Outer Leg Trip",
+        "Sotokomata" to "Outer Thigh Scooping Body Drop",
+        "Susoharai" to "Rear Foot Sweep",
+        "Susotori" to "Toe Pick",
+        "Tsumatori" to "Rear Ankle Pick",
+        "Uchigake" to "Inner Leg Trip",
+        "Watashikomi" to "Thigh-Grabbing Push-Down",
+
+        // --- Throwing Techniques ---
+        "Ipponzeoi" to "One-Armed Shoulder Throw",
+        "Kakenage" to "Hooking Inner Thigh Throw",
+        "Koshinage" to "Hip Throw",
+        "Kotenage" to "Armlock Throw",
+        "Kubinage" to "Headlock Throw",
+        "Nichonage" to "Body Drop Throw",
+        "Shitatedashinage" to "Pulling Underarm Throw",
+        "Shitatenage" to "Underarm Throw",
+        "Sukuinage" to "Beltless Arm Throw",
+        "Tsukaminage" to "Lifting Throw",
+        "Uwatedashinage" to "Pulling Overarm Throw",
+        "Uwatenage" to "Overarm Throw",
+        "Yaguranage" to "Inner Thigh Throw",
+
+        // --- Twist Down Techniques ---
+        "Amiuchi" to "The Fisherman's Throw",
+        "Gasshohineri" to "Clasping Head Twist Down",
+        "Harimanage" to "Backward Belt Throw",
+        "Kainahineri" to "Two-Handed Arm Twist Down",
+        "Katasukashi" to "Under-Shoulder Swing Down",
+        "Kotehineri" to "Arm Locking Twist Down",
+        "Kubihineri" to "Head Twisting Throw",
+        "Makiotoshi" to "Twist Down",
+        "Osakate" to "Backward Twisting Overarm Throw",
+        "Sabaori" to "Forward Crush Down",
+        "Sakatottari" to "Arm Bar Throw Counter",
+        "Shitatehineri" to "Twisting Underarm Throw",
+        "Sotomuso" to "Outer Thigh Propping Twist Down",
+        "Tokkurinage" to "Two-Handed Head Twist Down",
+        "Tottari" to "Arm Bar Throw",
+        "Tsukiotoshi" to "Thrust Down",
+        "Uchimuso" to "Inner Thigh Propping Twist Down",
+        "Uwatehineri" to "Twisting Overarm Throw",
+        "Zubuneri" to "Head Pivot Throw",
+
+        // --- Backwards Body Drop Techniques ---
+        "Izori" to "Backward Body Drop",
+        "Kakezori" to "Hooking Backwards Body Drop",
+        "Shumokuzori" to "Bell-Hammer Backwards Body Drop",
+        "Sototasukizori" to "Outer Reverse Backwards Body Drop",
+        "Tasukizori" to "Reverse Backwards Body Drop",
+        "Tsutaezori" to "Underarm Forward Body Drop",
+
+        // --- Special Techniques ---
+        "Hatakikomi" to "Slap Down",
+        "Hikiotoshi" to "Hand Pull Down",
+        "Hikkake" to "Arm Grabbing Force Out",
+        "Kimedashi" to "Arm Barring Force Out",
+        "Kimetaoshi" to "Arm Barring Force Down",
+        "Okuridashi" to "Rear Push Out",
+        "Okurigake" to "Rear Leg Trip",
+        "Okurihikiotoshi" to "Rear Pull Down",
+        "Okurinage" to "Rear Throw Down",
+        "Okuritaoshi" to "Rear Push Down",
+        "Okuritsuridashi" to "Rear Lift Out",
+        "Okuritsuriotoshi" to "Rear Lifting Body Slam",
+        "Sokubiotoshi" to "Head Chop Down",
+        "Tsuridashi" to "Frontal Lift Out",
+        "Tsuriotoshi" to "Frontal Lifting Body Slam",
+        "Ushiromotare" to "Backward Lean Out",
+        "Utchari" to "Backward Pivot Throw",
+        "Waridashi" to "Upper-Arm Force Out",
+        "Yobimodoshi" to "Pulling Body Slam",
+
+        // --- Non-Techniques (Wins/Losses) ---
+        "Fumidashi" to "Rear Step Out (Loss)",
+        "Fusen" to "Default Win By Absence",
+        "Hansoku" to "Foul (Disqualification)",
+        "Isamiashi" to "Forward Step Out (Loss)",
+        "Koshikudake" to "Inadvertent Collapse (Loss)",
+        "Tsukihiza" to "Knee Touch Down (Loss)",
+        "Tsukite" to "Hand Touch Down (Loss)"
     )
 }
