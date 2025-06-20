@@ -31,8 +31,6 @@ class ThemeAdapter(
 
         val colorRes = when (theme) {
             "Taiho Theme" -> R.color.button_purple
-            "Green Theme" -> R.color.button_green
-            "Blue Theme" -> R.color.button_blue
             "JSA Theme" -> R.color.button_jsa
             else -> R.color.button_dark_red
         }

@@ -13,14 +13,6 @@
         <item name="buttonBackgroundColor">@color/button_purple</item>
     </style>
 
-    <style name="GreenTheme" parent="Theme.SumoApp">
-        <item name="buttonBackgroundColor">@color/button_green</item>
-    </style>
-
-    <style name="BlueTheme" parent="Theme.SumoApp">
-        <item name="buttonBackgroundColor">@color/button_blue</item>
-    </style>
-
     <style name="JsaTheme" parent="Theme.SumoApp">
         <item name="buttonBackgroundColor">@color/button_jsa</item>
     </style>

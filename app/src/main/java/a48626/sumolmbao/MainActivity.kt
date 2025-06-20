@@ -33,8 +33,6 @@ class MainActivity : AppCompatActivity()
         val sharedPreferences = getSharedPreferences("ThemePrefs", Context.MODE_PRIVATE)
         when (sharedPreferences.getString("SelectedTheme", "RedTheme")) {
             "PurpleTheme" -> setTheme(R.style.PurpleTheme)
-            "GreenTheme" -> setTheme(R.style.GreenTheme)
-            "BlueTheme" -> setTheme(R.style.BlueTheme)
             "JsaTheme" -> setTheme(R.style.JsaTheme)
             else -> setTheme(R.style.RedTheme)
         }

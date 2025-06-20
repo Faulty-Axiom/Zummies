@@ -22,7 +22,7 @@
                 android:id="@+id/tatakai_image"
                 android:layout_width="80dp"
                 android:layout_height="80dp"
-                android:src="@drawable/tatakai"
+                android:src="@drawable/tatakai_red"
                 android:scaleType="fitCenter" />
 
             <TextView
@@ -158,7 +158,7 @@
         android:id="@+id/glossaryRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="235dp"
+        android:layout_marginTop="254dp"
         android:layout_marginHorizontal="16dp"
         android:visibility="gone"
         android:elevation="10dp"

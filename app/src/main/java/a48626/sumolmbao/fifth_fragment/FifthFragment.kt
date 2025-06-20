@@ -31,6 +31,7 @@ class FifthFragment : Fragment() {
     private lateinit var selectedTermContainer: CardView
     private lateinit var selectedTermText: TextView
     private lateinit var selectedDefinitionText: TextView
+    private lateinit var tatakaiImage: ImageView
 
     // --- Adapters and Data ---
     private lateinit var themeAdapter: ThemeAdapter
@@ -47,6 +48,7 @@ class FifthFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initializeViews(view)
+        updateViewsForTheme() // Set initial theme-based UI
         setupThemeSelector()
         setupGlossary()
     }
@@ -61,10 +63,10 @@ class FifthFragment : Fragment() {
         selectedTermContainer = view.findViewById(R.id.selected_term_container)
         selectedTermText = view.findViewById(R.id.selected_term_text)
         selectedDefinitionText = view.findViewById(R.id.selected_definition_text)
+        tatakaiImage = view.findViewById(R.id.tatakai_image)
     }
 
     private fun setupThemeSelector() {
-        updateThemeButtonText()
         setupThemeRecyclerView()
 
         themeButton.setOnClickListener {
@@ -86,7 +88,6 @@ class FifthFragment : Fragment() {
         loadGlossaryData()
 
         glossaryAdapter = GlossaryAdapter(glossaryItems) { selectedItem ->
-            // When an item is clicked, hide the list and show the definition
             displayDefinition(selectedItem)
         }
         glossaryRecyclerView.layoutManager = LinearLayoutManager(context)
@@ -102,7 +103,7 @@ class FifthFragment : Fragment() {
 
         glossarySearchEditText.setOnFocusChangeListener { _, hasFocus ->
             if (hasFocus) {
-                selectedTermContainer.visibility = View.GONE // Hide definition card
+                selectedTermContainer.visibility = View.GONE
                 hideThemeSelector()
                 glossaryRecyclerView.visibility = View.VISIBLE
                 clearSearchButton.visibility = View.VISIBLE
@@ -159,13 +160,11 @@ class FifthFragment : Fragment() {
     }
 
     private fun setupThemeRecyclerView() {
-        val themes = listOf("Default Theme", "Taiho Theme", "Green Theme", "Blue Theme", "JSA Theme")
+        val themes = listOf("Default Theme", "Taiho Theme", "JSA Theme")
         themeAdapter = ThemeAdapter(themes) { theme ->
             hideThemeSelector()
             val themeToSet = when (theme) {
                 "Taiho Theme" -> "PurpleTheme"
-                "Green Theme" -> "GreenTheme"
-                "Blue Theme" -> "BlueTheme"
                 "JSA Theme" -> "JsaTheme"
                 else -> "RedTheme"
             }
@@ -176,18 +175,30 @@ class FifthFragment : Fragment() {
         themeRecyclerView.adapter = themeAdapter
     }
 
-    private fun updateThemeButtonText() {
+    private fun updateViewsForTheme() {
         val sharedPreferences = activity?.getSharedPreferences("ThemePrefs", Context.MODE_PRIVATE)
         val currentTheme = sharedPreferences?.getString("SelectedTheme", "RedTheme")
 
-        val displayThemeName = when (currentTheme) {
-            "PurpleTheme" -> "Taiho Theme"
-            "Green Theme" -> "Green Theme"
-            "Blue Theme" -> "Blue Theme"
-            "JsaTheme" -> "JSA Theme"
-            else -> "Default Theme"
+        val displayThemeName: String
+        val drawableResId: Int
+
+        when (currentTheme) {
+            "PurpleTheme" -> {
+                displayThemeName = "Taiho Theme"
+                drawableResId = R.drawable.tatakai_purple
+            }
+            "JsaTheme" -> {
+                displayThemeName = "JSA Theme"
+                drawableResId = R.drawable.tatakai_jsa
+            }
+            else -> { // Default for RedTheme, GreenTheme, BlueTheme
+                displayThemeName = "Default Theme"
+                drawableResId = R.drawable.tatakai_red
+            }
         }
+
         themeButton.text = displayThemeName
+        tatakaiImage.setImageResource(drawableResId)
     }
 
     private fun saveTheme(themeName: String) {
