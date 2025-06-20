@@ -2,7 +2,6 @@ package a48626.sumolmbao.fourth_fragment
 
 import a48626.sumolmbao.R
 import a48626.sumolmbao.data.RikishiDetails
-import a48626.sumolmbao.data.RikishiMatch
 import a48626.sumolmbao.data.RikishiMatchesResponse
 import a48626.sumolmbao.database.RikishiDatabase
 import a48626.sumolmbao.database.RikishiDao
@@ -22,7 +21,6 @@ import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.FrameLayout
-import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.core.content.ContextCompat
@@ -321,7 +319,7 @@ class FourthFragment : Fragment() {
         lifecycleScope.launch {
             try {
                 val matchesResponse = withContext(Dispatchers.IO) {
-                    RetrofitInstance.api.getRikishiMatches(rikishi1.id, rikishi2.id)
+                    RetrofitInstance.api.getRikishiVersusMatches(rikishi1.id, rikishi2.id)
                 }
                 withContext(Dispatchers.Main) {
                     progressBar.visibility = View.GONE

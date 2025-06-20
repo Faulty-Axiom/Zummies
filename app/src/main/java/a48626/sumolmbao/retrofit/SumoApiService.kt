@@ -17,18 +17,18 @@ interface SumoApiService
     @GET("api/basho/{bashoId}")
     fun getBasho(@Path("bashoId") bashoId: String): Call<Basho>
 
+    @GET("api/basho/{bashoId}/banzuke/{division}")
+    fun getBanzuke(
+        @Path("bashoId") bashoId: String,
+        @Path("division") division: String
+    ): Call<Banzuke>
+
     @GET("api/basho/{bashoId}/torikumi/{division}/{day}")
     fun getTorikumi(
         @Path("bashoId") bashoId: String,
         @Path("division") division: String,
         @Path("day") day: Int
     ): Call<TorikumiResponse>
-
-    @GET("api/basho/{bashoId}/banzuke/{division}")
-    fun getBanzuke(
-        @Path("bashoId") bashoId: String,
-        @Path("division") division: String
-    ): Call<Banzuke>
 
     //TODO SUBSTITUIR rikishis por rikishis?intai=true
     @GET("api/rikishis")
@@ -64,7 +64,7 @@ interface SumoApiService
     ): RikishiStats
 
     @GET("api/rikishi/{rikishiId}/matches/{opponentId}")
-    suspend fun getRikishiMatches(
+    suspend fun getRikishiVersusMatches(
         @Path("rikishiId") rikishiId: Int,
         @Path("opponentId") opponentId: Int,
         @Query("bashoId") bashoId: String? = null
