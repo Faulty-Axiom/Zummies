@@ -40,4 +40,39 @@
     <string name="rikishi_meaning">Sumo wrestler</string>
     <string name="kimarite_meaning">Winning technique</string>
     <string name="rikishi_image">Rikishi Image</string>
+
+    <string name="account_button_text">Account</string>
+    <string name="login_icon_desc">Login Icon</string>
+    <string name="hello_again">Hello Again!</string>
+    <string name="welcome_back">Welcome Back</string>
+    <string name="email_hint">Email</string>
+    <string name="password_hint">Password</string>
+    <string name="login_button_text">Login</string>
+    <string name="no_account_prompt">Don\'t have an account?</string>
+    <string name="create_account_button_text">Create Account</string>
+    <string name="signup_icon_desc">Signup Icon</string>
+    <string name="hello_user">Hello!</string>
+    <string name="lets_get_started">Let\'s Get Started</string>
+    <string name="confirm_password_hint">Confirm Password</string>
+    <string name="already_have_account_prompt">Already have an account?</string>
+    <string name="register_button_text">Register</string>
+
+    <string name="account_icon_desc">Account Icon</string>
+    <string name="account_title">Account Details</string>
+    <string name="change_password_button_text">Change Password</string>
+    <string name="logout_button_text">Logout</string>
+
+    <string name="old_password_hint">Old Password</string>
+    <string name="new_password_hint">New Password</string>
+    <string name="confirm_new_password_hint">Confirm New Password</string>
+    <string name="confirm_changes_button_text">Confirm Changes</string>
+
+    <string name="login_required_toast">To use this feature, you must first log into your account.</string>
+
+    <string name="themes_premium_title">Premium Feature</string>
+    <string name="themes_premium_message">Custom themes are a premium feature. Unlock all themes forever for a one-time payment.</string>
+    <string name="themes_price">Price: 1€</string>
+    <string name="pay_button_text">Pay</string>
+    <string name="cancel_button_text">Cancel</string>
+    <string name="payment_successful_toast">Payment successful! Themes unlocked.</string>
 </resources>

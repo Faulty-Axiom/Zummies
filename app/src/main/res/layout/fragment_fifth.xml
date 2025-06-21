@@ -11,31 +11,57 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <LinearLayout
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:padding="16dp"
-            android:gravity="center_vertical">
+            android:padding="16dp">
 
-            <ImageView
-                android:id="@+id/tatakai_image"
-                android:layout_width="80dp"
-                android:layout_height="80dp"
-                android:src="@drawable/tatakai_red"
-                android:scaleType="fitCenter" />
-
-            <TextView
-                android:id="@+id/tatakai_text"
+            <LinearLayout
+                android:id="@+id/theme_info_layout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Tatakai"
-                android:textSize="24sp"
-                android:textStyle="bold"
-                android:textColor="@android:color/white"
-                android:layout_marginStart="16dp"/>
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
 
-        </LinearLayout>
+                <ImageView
+                    android:id="@+id/tatakai_image"
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/tatakai_red" />
+
+                <TextView
+                    android:id="@+id/tatakai_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:text="Tatakai"
+                    android:textColor="@android:color/white"
+                    android:textSize="24sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/account_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:minWidth="120dp"
+                android:gravity="center"
+                android:padding="12dp"
+                android:textSize="16sp"
+                android:elevation="4dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:textColor="@android:color/white"
+                android:background="@drawable/button_background_rounded"
+                android:foreground="@drawable/rounded_button_ripple"
+                android:text="@string/account_button_text" />
+
+        </RelativeLayout>
 
         <LinearLayout
             android:id="@+id/theme_button_container"

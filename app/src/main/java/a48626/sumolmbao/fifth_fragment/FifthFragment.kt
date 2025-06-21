@@ -1,7 +1,12 @@
 package a48626.sumolmbao.fifth_fragment
 
+import a48626.sumolmbao.AccountDetailsActivity
+import a48626.sumolmbao.LoginActivity
 import a48626.sumolmbao.R
+import a48626.sumolmbao.Utility
+import android.app.AlertDialog
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -18,11 +23,13 @@ import androidx.cardview.widget.CardView
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.firebase.auth.FirebaseAuth
 
 class FifthFragment : Fragment() {
 
     // --- Views ---
     private lateinit var themeButton: TextView
+    private lateinit var accountButton: TextView
     private lateinit var themeRecyclerView: RecyclerView
     private lateinit var overlay: View
     private lateinit var glossarySearchEditText: EditText
@@ -37,6 +44,8 @@ class FifthFragment : Fragment() {
     private lateinit var themeAdapter: ThemeAdapter
     private lateinit var glossaryAdapter: GlossaryAdapter
     private val glossaryItems = mutableListOf<GlossaryItem>()
+    private val firebaseAuth = FirebaseAuth.getInstance()
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -48,13 +57,23 @@ class FifthFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initializeViews(view)
-        updateViewsForTheme() // Set initial theme-based UI
+        updateViewsForTheme()
         setupThemeSelector()
         setupGlossary()
+
+        // --- Conditional navigation for Account button ---
+        accountButton.setOnClickListener {
+            if (firebaseAuth.currentUser == null) {
+                startActivity(Intent(activity, LoginActivity::class.java))
+            } else {
+                startActivity(Intent(activity, AccountDetailsActivity::class.java))
+            }
+        }
     }
 
     private fun initializeViews(view: View) {
         themeButton = view.findViewById(R.id.themeButton)
+        accountButton = view.findViewById(R.id.account_button)
         themeRecyclerView = view.findViewById(R.id.themeRecyclerView)
         overlay = view.findViewById(R.id.overlay)
         glossarySearchEditText = view.findViewById(R.id.glossarySearchEditText)
@@ -70,12 +89,28 @@ class FifthFragment : Fragment() {
         setupThemeRecyclerView()
 
         themeButton.setOnClickListener {
-            animateButtonClick(it)
-            if (themeRecyclerView.isVisible) {
-                hideThemeSelector()
+            if (firebaseAuth.currentUser == null) {
+                // User is not logged in, show a toast
+                Utility.showToast(requireContext(), getString(R.string.login_required_toast))
+                return@setOnClickListener
+            }
+
+            // --- PAYWALL LOGIC ---
+            val prefs = requireActivity().getSharedPreferences("PurchasePrefs", Context.MODE_PRIVATE)
+            val hasPaid = prefs.getBoolean("hasPaidForThemes", false)
+
+            if (hasPaid) {
+                // User has paid, show the theme selector
+                animateButtonClick(it)
+                if (themeRecyclerView.isVisible) {
+                    hideThemeSelector()
+                } else {
+                    hideKeyboardAndGlossaryList()
+                    showThemeSelector()
+                }
             } else {
-                hideKeyboardAndGlossaryList()
-                showThemeSelector()
+                // User has not paid, show the purchase dialog
+                showPurchaseDialog()
             }
         }
 
@@ -84,39 +119,37 @@ class FifthFragment : Fragment() {
         }
     }
 
-    private fun setupGlossary() {
-        loadGlossaryData()
+    private fun showPurchaseDialog() {
+        val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_purchase_themes, null)
+        val dialog = AlertDialog.Builder(context)
+            .setView(dialogView)
+            .create()
 
-        glossaryAdapter = GlossaryAdapter(glossaryItems) { selectedItem ->
-            displayDefinition(selectedItem)
-        }
-        glossaryRecyclerView.layoutManager = LinearLayoutManager(context)
-        glossaryRecyclerView.adapter = glossaryAdapter
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
 
-        glossarySearchEditText.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                glossaryAdapter.filter.filter(s)
-            }
-            override fun afterTextChanged(s: Editable?) {}
-        })
+        val cancelButton = dialogView.findViewById<TextView>(R.id.cancel_button)
+        val payButton = dialogView.findViewById<TextView>(R.id.pay_button)
 
-        glossarySearchEditText.setOnFocusChangeListener { _, hasFocus ->
-            if (hasFocus) {
-                selectedTermContainer.visibility = View.GONE
-                hideThemeSelector()
-                glossaryRecyclerView.visibility = View.VISIBLE
-                clearSearchButton.visibility = View.VISIBLE
-            } else {
-                clearSearchButton.visibility = View.GONE
-            }
+        cancelButton.setOnClickListener {
+            dialog.dismiss()
         }
 
-        clearSearchButton.setOnClickListener {
-            glossarySearchEditText.text.clear()
-            hideKeyboardAndGlossaryList()
+        payButton.setOnClickListener {
+            // Simulate a successful payment
+            val prefs = requireActivity().getSharedPreferences("PurchasePrefs", Context.MODE_PRIVATE)
+            prefs.edit().putBoolean("hasPaidForThemes", true).apply()
+
+            Utility.showToast(requireContext(), getString(R.string.payment_successful_toast))
+            dialog.dismiss()
+
+            // Immediately show the theme selector now that it's unlocked
+            showThemeSelector()
         }
+
+        dialog.show()
     }
+
+    // ... The rest of your FifthFragment code remains unchanged ...
 
     private fun displayDefinition(item: GlossaryItem) {
         selectedTermText.text = item.term
@@ -159,6 +192,40 @@ class FifthFragment : Fragment() {
         }
     }
 
+    private fun setupGlossary() {
+        loadGlossaryData()
+
+        glossaryAdapter = GlossaryAdapter(glossaryItems) { selectedItem ->
+            displayDefinition(selectedItem)
+        }
+        glossaryRecyclerView.layoutManager = LinearLayoutManager(context)
+        glossaryRecyclerView.adapter = glossaryAdapter
+
+        glossarySearchEditText.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                glossaryAdapter.filter.filter(s)
+            }
+            override fun afterTextChanged(s: Editable?) {}
+        })
+
+        glossarySearchEditText.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                selectedTermContainer.visibility = View.GONE
+                hideThemeSelector()
+                glossaryRecyclerView.visibility = View.VISIBLE
+                clearSearchButton.visibility = View.VISIBLE
+            } else {
+                clearSearchButton.visibility = View.GONE
+            }
+        }
+
+        clearSearchButton.setOnClickListener {
+            glossarySearchEditText.text.clear()
+            hideKeyboardAndGlossaryList()
+        }
+    }
+
     private fun setupThemeRecyclerView() {
         val themes = listOf("Default Theme", "Taiho Theme", "JSA Theme")
         themeAdapter = ThemeAdapter(themes) { theme ->
@@ -191,7 +258,7 @@ class FifthFragment : Fragment() {
                 displayThemeName = "JSA Theme"
                 drawableResId = R.drawable.tatakai_jsa
             }
-            else -> { // Default for RedTheme, GreenTheme, BlueTheme
+            else -> {
                 displayThemeName = "Default Theme"
                 drawableResId = R.drawable.tatakai_red
             }
