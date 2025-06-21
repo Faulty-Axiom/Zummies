@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "895711632169",
+    "project_id": "tatakai-48626",
+    "storage_bucket": "tatakai-48626.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:895711632169:android:e064f0417bb80d05543538",
+        "android_client_info": {
+          "package_name": "a48626.sumolmbao"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAyVqH1un0Fhx8AYJRcChaAZNRDali_ynE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
