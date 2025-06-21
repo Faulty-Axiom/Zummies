@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- When state_selected is true, show the white-filled version -->
+    <item android:drawable="@drawable/heart_icon_filled" android:state_selected="true"/>
+
+    <!-- By default (state_selected="false"), show the original outlined version -->
+    <item android:drawable="@drawable/chonmage" />
+
+</selector>

@@ -17,5 +17,6 @@
     <color name="button_purple">#53445e</color>
     <color name="button_green">#FF4CAF50</color>
     <color name="button_blue">#FF2196F3</color>
-    <color name="button_jsa">#e1a0c0</color>
+    <color name="button_jsa">#d67eaa</color>
+    <color name="button_jsa2">#e1a0c0</color>
 </resources>

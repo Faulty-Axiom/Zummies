@@ -5,43 +5,50 @@
     android:layout_height="match_parent"
     tools:context=".third_fragment.ThirdFragment">
 
-    <!-- ImageView as background -->
     <ImageView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scaleType="centerCrop"
         android:src="@drawable/rikishi5" />
 
-    <!-- Main content container -->
     <LinearLayout
+        android:id="@+id/main_content"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:id="@+id/main_content">
+        android:orientation="vertical">
 
-        <!-- Search bar container -->
+        <!-- Search bar container now includes the heart icon -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="@color/bottom_top_colour"
+            android:gravity="center_vertical"
             android:orientation="horizontal"
-            android:gravity="center"
-            android:padding="8dp"
-            android:background="@color/bottom_top_colour">
+            android:padding="8dp">
 
             <EditText
                 android:id="@+id/searchEditText"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:background="@drawable/button_background_rounded"
+                android:foreground="@drawable/rounded_button_ripple"
                 android:hint="@string/search_rikishi"
                 android:padding="16dp"
                 android:textColor="@android:color/white"
-                android:background="@drawable/button_background_rounded"
-                android:foreground="@drawable/rounded_button_ripple"
                 android:textColorHint="@android:color/white"
-                android:layout_marginEnd="8dp"
-                android:textSize="16sp"
-                android:layout_gravity="center"/>
+                android:textSize="16sp" />
+
+            <ImageView
+                android:id="@+id/favourite_button_top_bar"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_marginStart="8dp"
+                android:padding="8dp"
+                android:background="@drawable/button_background_rounded"
+                android:src="@drawable/favourite_selector"
+                android:visibility="gone"
+                tools:visibility="visible" />
         </LinearLayout>
 
         <!-- Rikishi Details Container -->
@@ -49,23 +56,23 @@
             android:id="@+id/detailContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:background="@drawable/button_background_rounded"
             android:layout_marginLeft="20dp"
-            android:layout_marginRight="20dp"
             android:layout_marginTop="20dp"
+            android:layout_marginRight="20dp"
             android:layout_marginBottom="100dp"
-            android:padding="12dp"
-            android:visibility="gone"
+            android:background="@drawable/button_background_rounded"
             android:clickable="false"
-            android:focusable="false">
+            android:focusable="false"
+            android:orientation="vertical"
+            android:padding="12dp"
+            android:visibility="gone">
 
             <!-- Details Header with Underline -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
                 android:gravity="center"
+                android:orientation="vertical"
                 android:paddingBottom="8dp">
 
                 <ProgressBar
@@ -75,34 +82,32 @@
                     android:layout_gravity="center"
                     android:visibility="gone" />
 
-                <!-- English name TextView -->
+                <!-- The RelativeLayout and heart icon have been removed from here -->
                 <TextView
                     android:id="@+id/rikishiEnglishName"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="30sp"
+                    android:gravity="center"
                     android:textColor="@android:color/white"
+                    android:textSize="30sp"
                     android:textStyle="bold"
-                    android:gravity="center" />
+                    tools:text="Rikishi Name (EN)" />
 
-                <!-- Japanese name TextView -->
                 <TextView
                     android:id="@+id/rikishiJapaneseName"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="30sp"
-                    android:textColor="@android:color/white"
-                    android:textStyle="bold"
-                    android:gravity="center" />
+                    android:gravity="center"
+                    android:textSize="24sp"
+                    android:textStyle="bold" />
 
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="2dp"
-                    android:background="@android:color/white"/>
+                    android:background="@android:color/white" />
 
             </LinearLayout>
 
-            <!-- Details content -->
             <androidx.core.widget.NestedScrollView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -113,30 +118,26 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:clipToPadding="false"
-                    android:padding="8dp"/>
+                    android:padding="8dp" />
             </androidx.core.widget.NestedScrollView>
 
         </LinearLayout>
-
     </LinearLayout>
 
-    <!-- This FrameLayout will contain both the search bar and the recycler view -->
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="top">
 
-        <!-- Search results RecyclerView -->
         <a48626.sumolmbao.MaxHeightRecyclerView
             android:id="@+id/rikishiRecyclerView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="?attr/buttonBackgroundColor"
             android:layout_marginTop="60dp"
+            android:background="?attr/buttonBackgroundColor"
             android:clipToPadding="false"
             android:padding="8dp"
             android:visibility="gone"
             tools:listitem="@layout/item_rikishi" />
     </FrameLayout>
-
 </FrameLayout>

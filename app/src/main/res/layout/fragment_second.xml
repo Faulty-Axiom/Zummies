@@ -5,16 +5,10 @@
     android:layout_height="match_parent"
     tools:context=".SecondFragment">
 
-    <ImageView
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/favourites_recycler_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:scaleType="centerCrop"
-        android:src="@drawable/chiyonofujikitanoumi" />
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="center"
-        android:text="@string/favourites" />
+        tools:listitem="@android:layout/simple_list_item_1" />
 
 </FrameLayout>

@@ -24,6 +24,7 @@ class RikishiAdapter(
         private const val TYPE_DIVIDER = 1
     }
 
+    // ViewHolder no longer references a favourite button
     inner class RikishiViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val nameTextView: TextView = itemView.findViewById(R.id.rikishiName)
 
@@ -31,7 +32,7 @@ class RikishiAdapter(
             itemView.setOnClickListener {
                 val position = adapterPosition
                 if (position != RecyclerView.NO_POSITION) {
-                    val itemPosition = position / 2 // Because we're adding dividers
+                    val itemPosition = position / 2
                     if (itemPosition < rikishiList.size) {
                         onItemClick?.invoke(rikishiList[itemPosition])
                         recyclerView.visibility = View.GONE
@@ -72,14 +73,13 @@ class RikishiAdapter(
                     val cleanName = rikishi.shikonaEn?.replace("#", "") ?: "Unknown"
                     val displayRank = rikishi.currentRank ?: "Retired"
                     holder.nameTextView.text = "$cleanName - $displayRank"
+                    // All favourite button logic has been removed from here
                 }
             }
         }
     }
 
     override fun getItemCount(): Int {
-        // Double the count (one for each item + one for each divider)
-        // Subtract 1 because we don't need a divider after the last item
         return if (rikishiList.isEmpty()) 0 else (rikishiList.size * 2) - 1
     }
 
