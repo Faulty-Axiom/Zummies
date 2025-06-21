@@ -10,6 +10,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -24,10 +25,12 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 
 class FifthFragment : Fragment() {
 
-    // --- Views ---
+    // --- Views & Adapters---
     private lateinit var themeButton: TextView
     private lateinit var accountButton: TextView
     private lateinit var themeRecyclerView: RecyclerView
@@ -39,13 +42,13 @@ class FifthFragment : Fragment() {
     private lateinit var selectedTermText: TextView
     private lateinit var selectedDefinitionText: TextView
     private lateinit var tatakaiImage: ImageView
-
-    // --- Adapters and Data ---
     private lateinit var themeAdapter: ThemeAdapter
     private lateinit var glossaryAdapter: GlossaryAdapter
     private val glossaryItems = mutableListOf<GlossaryItem>()
-    private val firebaseAuth = FirebaseAuth.getInstance()
 
+    // --- Firebase Instances ---
+    private val firebaseAuth = FirebaseAuth.getInstance()
+    private val db = FirebaseFirestore.getInstance()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -61,7 +64,6 @@ class FifthFragment : Fragment() {
         setupThemeSelector()
         setupGlossary()
 
-        // --- Conditional navigation for Account button ---
         accountButton.setOnClickListener {
             if (firebaseAuth.currentUser == null) {
                 startActivity(Intent(activity, LoginActivity::class.java))
@@ -89,67 +91,64 @@ class FifthFragment : Fragment() {
         setupThemeRecyclerView()
 
         themeButton.setOnClickListener {
-            if (firebaseAuth.currentUser == null) {
-                // User is not logged in, show a toast
+            val currentUser = firebaseAuth.currentUser
+            if (currentUser == null) {
                 Utility.showToast(requireContext(), getString(R.string.login_required_toast))
                 return@setOnClickListener
             }
 
-            // --- PAYWALL LOGIC ---
-            val prefs = requireActivity().getSharedPreferences("PurchasePrefs", Context.MODE_PRIVATE)
-            val hasPaid = prefs.getBoolean("hasPaidForThemes", false)
-
-            if (hasPaid) {
-                // User has paid, show the theme selector
-                animateButtonClick(it)
-                if (themeRecyclerView.isVisible) {
-                    hideThemeSelector()
+            // --- FIREBASE PAYWALL LOGIC ---
+            val userDocRef = db.collection("users").document(currentUser.uid)
+            userDocRef.get().addOnSuccessListener { document ->
+                val hasPaid = document.getBoolean("hasPaidForThemes") ?: false
+                if (hasPaid) {
+                    animateButtonClick(it)
+                    if (themeRecyclerView.isVisible) hideThemeSelector() else showThemeSelector()
                 } else {
-                    hideKeyboardAndGlossaryList()
-                    showThemeSelector()
+                    showPurchaseDialog()
                 }
-            } else {
-                // User has not paid, show the purchase dialog
-                showPurchaseDialog()
+            }.addOnFailureListener { e ->
+                Log.w("FifthFragment", "Error getting payment status", e)
+                Utility.showToast(requireContext(), "Could not check payment status.")
             }
         }
 
-        overlay.setOnClickListener {
-            hideThemeSelector()
-        }
+        overlay.setOnClickListener { hideThemeSelector() }
     }
 
     private fun showPurchaseDialog() {
         val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_purchase_themes, null)
-        val dialog = AlertDialog.Builder(context)
-            .setView(dialogView)
-            .create()
+        val dialog = AlertDialog.Builder(context).setView(dialogView).create()
 
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
 
         val cancelButton = dialogView.findViewById<TextView>(R.id.cancel_button)
         val payButton = dialogView.findViewById<TextView>(R.id.pay_button)
 
-        cancelButton.setOnClickListener {
-            dialog.dismiss()
-        }
+        cancelButton.setOnClickListener { dialog.dismiss() }
 
         payButton.setOnClickListener {
-            // Simulate a successful payment
-            val prefs = requireActivity().getSharedPreferences("PurchasePrefs", Context.MODE_PRIVATE)
-            prefs.edit().putBoolean("hasPaidForThemes", true).apply()
+            val currentUser = firebaseAuth.currentUser ?: return@setOnClickListener
 
-            Utility.showToast(requireContext(), getString(R.string.payment_successful_toast))
-            dialog.dismiss()
-
-            // Immediately show the theme selector now that it's unlocked
-            showThemeSelector()
+            // --- WRITE TO FIREBASE ON PAYMENT ---
+            val paymentData = hashMapOf("hasPaidForThemes" to true)
+            db.collection("users").document(currentUser.uid)
+                .set(paymentData, SetOptions.merge())
+                .addOnSuccessListener {
+                    Utility.showToast(requireContext(), getString(R.string.payment_successful_toast))
+                    dialog.dismiss()
+                    showThemeSelector()
+                }
+                .addOnFailureListener { e ->
+                    Log.w("FifthFragment", "Error writing payment status", e)
+                    Utility.showToast(requireContext(), "Payment failed. Please try again.")
+                    dialog.dismiss()
+                }
         }
-
         dialog.show()
     }
 
-    // ... The rest of your FifthFragment code remains unchanged ...
+    // ... Other fragment functions (displayDefinition, etc.) remain here ...
 
     private fun displayDefinition(item: GlossaryItem) {
         selectedTermText.text = item.term
@@ -194,13 +193,11 @@ class FifthFragment : Fragment() {
 
     private fun setupGlossary() {
         loadGlossaryData()
-
         glossaryAdapter = GlossaryAdapter(glossaryItems) { selectedItem ->
             displayDefinition(selectedItem)
         }
         glossaryRecyclerView.layoutManager = LinearLayoutManager(context)
         glossaryRecyclerView.adapter = glossaryAdapter
-
         glossarySearchEditText.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
@@ -208,7 +205,6 @@ class FifthFragment : Fragment() {
             }
             override fun afterTextChanged(s: Editable?) {}
         })
-
         glossarySearchEditText.setOnFocusChangeListener { _, hasFocus ->
             if (hasFocus) {
                 selectedTermContainer.visibility = View.GONE
@@ -219,7 +215,6 @@ class FifthFragment : Fragment() {
                 clearSearchButton.visibility = View.GONE
             }
         }
-
         clearSearchButton.setOnClickListener {
             glossarySearchEditText.text.clear()
             hideKeyboardAndGlossaryList()
@@ -245,10 +240,8 @@ class FifthFragment : Fragment() {
     private fun updateViewsForTheme() {
         val sharedPreferences = activity?.getSharedPreferences("ThemePrefs", Context.MODE_PRIVATE)
         val currentTheme = sharedPreferences?.getString("SelectedTheme", "RedTheme")
-
         val displayThemeName: String
         val drawableResId: Int
-
         when (currentTheme) {
             "PurpleTheme" -> {
                 displayThemeName = "Taiho Theme"
@@ -263,7 +256,6 @@ class FifthFragment : Fragment() {
                 drawableResId = R.drawable.tatakai_red
             }
         }
-
         themeButton.text = displayThemeName
         tatakaiImage.setImageResource(drawableResId)
     }

@@ -18,4 +18,7 @@
     <color name="button_green">#FF4CAF50</color>
     <color name="button_blue">#FF2196F3</color>
     <color name="button_jsa">#e1a0c0</color>
+
+    <color name="dialog_background">#CC000000</color>
+    <color name="pay_button_green">#4CAF50</color>
 </resources>
