@@ -1,3 +1,4 @@
+// app/src/main/java/a48626/sumolmbao/third_fragment/SumoApplication.kt
 package a48626.sumolmbao.third_fragment
 
 import a48626.sumolmbao.data.RikishiDetails
@@ -46,12 +47,19 @@ class SumoApplication : Application() {
             val isExpired = now - lastFetched > oneWeekMillis
             val count = rikishiDao.getCount()
 
+            // Log the cache expiration status
+            Log.d("CacheStatus", "isExpired: $isExpired")
+
             if (count == 0 || isExpired) {
                 fetchAndStoreRikishi(rikishiDao)
                 prefs.edit().putLong("rikishi_last_fetch", now).apply()
                 Log.d("DataInit", "Fetched fresh data and updated timestamp")
             } else {
-                Log.d("DataInit", "Using cached data ($count records)")
+                // Calculate and log the time remaining until cache refresh
+                val timeRemainingMillis = lastFetched + oneWeekMillis - now
+                val hoursRemaining = timeRemainingMillis / (60 * 60 * 1000)
+                val minutesRemaining = (timeRemainingMillis % (60 * 60 * 1000)) / (60 * 1000)
+                Log.d("DataInit", "Using cached data ($count records). Cache will refresh in approximately ${hoursRemaining} hours and ${minutesRemaining} minutes.")
             }
 
             onDataLoaded()

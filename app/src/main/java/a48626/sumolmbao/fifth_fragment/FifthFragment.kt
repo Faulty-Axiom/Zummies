@@ -1,6 +1,7 @@
 package a48626.sumolmbao.fifth_fragment
 
 import a48626.sumolmbao.R
+import a48626.sumolmbao.favourites.FavouritesManager
 import android.content.Context
 import android.os.Bundle
 import android.text.Editable
@@ -11,9 +12,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
 import android.view.inputmethod.InputMethodManager
+import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.cardview.widget.CardView
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -32,6 +35,11 @@ class FifthFragment : Fragment() {
     private lateinit var selectedTermText: TextView
     private lateinit var selectedDefinitionText: TextView
     private lateinit var tatakaiImage: ImageView
+    private lateinit var exportTextView: TextView
+    private lateinit var importTextView: TextView
+    private lateinit var exportCard: CardView
+    private lateinit var importCard: CardView
+
 
     // --- Adapters and Data ---
     private lateinit var themeAdapter: ThemeAdapter
@@ -51,6 +59,7 @@ class FifthFragment : Fragment() {
         updateViewsForTheme() // Set initial theme-based UI
         setupThemeSelector()
         setupGlossary()
+        setupImportExport(view)
     }
 
     private fun initializeViews(view: View) {
@@ -64,6 +73,10 @@ class FifthFragment : Fragment() {
         selectedTermText = view.findViewById(R.id.selected_term_text)
         selectedDefinitionText = view.findViewById(R.id.selected_definition_text)
         tatakaiImage = view.findViewById(R.id.tatakai_image)
+        exportTextView = view.findViewById(R.id.export_textview_button)
+        importTextView = view.findViewById(R.id.import_textview_button)
+        exportCard = view.findViewById(R.id.export_card)
+        importCard = view.findViewById(R.id.import_card)
     }
 
     private fun setupThemeSelector() {
@@ -115,6 +128,43 @@ class FifthFragment : Fragment() {
         clearSearchButton.setOnClickListener {
             glossarySearchEditText.text.clear()
             hideKeyboardAndGlossaryList()
+        }
+    }
+
+    private fun setupImportExport(view: View) {
+        val favouritesManager = FavouritesManager
+
+        exportTextView.setOnClickListener {
+            exportCard.visibility = View.VISIBLE
+            val exportDataTextView = exportCard.findViewById<EditText>(R.id.export_data_textview)
+            exportDataTextView.setText(favouritesManager.exportFavourites(requireContext()))
+        }
+
+        importTextView.setOnClickListener {
+            importCard.visibility = View.VISIBLE
+        }
+
+        val closeExportButton = exportCard.findViewById<Button>(R.id.close_export_button)
+        closeExportButton.setOnClickListener {
+            exportCard.visibility = View.GONE
+        }
+
+        val closeImportButton = importCard.findViewById<Button>(R.id.close_import_button)
+        closeImportButton.setOnClickListener {
+            importCard.visibility = View.GONE
+        }
+
+        val saveImportButton = importCard.findViewById<Button>(R.id.save_import_button)
+        saveImportButton.setOnClickListener {
+            val importDataEditText = importCard.findViewById<EditText>(R.id.import_data_edittext)
+            val data = importDataEditText.text.toString()
+            if (data.isNotBlank()) {
+                favouritesManager.importFavourites(requireContext(), data)
+                Toast.makeText(requireContext(), "Favourites imported successfully!", Toast.LENGTH_SHORT).show()
+                importCard.visibility = View.GONE
+            } else {
+                Toast.makeText(requireContext(), "Please paste your data", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
@@ -187,7 +237,7 @@ class FifthFragment : Fragment() {
                 displayThemeName = "Taiho Theme"
                 drawableResId = R.drawable.tatakai_purple
             }
-            "JsaTheme" -> {
+            "JSA Theme" -> {
                 displayThemeName = "JSA Theme"
                 drawableResId = R.drawable.tatakai_jsa
             }

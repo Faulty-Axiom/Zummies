@@ -90,11 +90,10 @@ class ThirdFragment : Fragment() {
 
         setupRecyclerView()
 
+        // When the search bar gets focus, just show the search list.
+        // The wrestler details will remain on screen until the user starts typing.
         searchEditText.setOnFocusChangeListener { _, hasFocus ->
             if (hasFocus) {
-                if (searchEditText.text.isNotEmpty()) {
-                    searchEditText.text.clear()
-                }
                 rikishiRecyclerView.visibility = View.VISIBLE
             }
         }
@@ -116,6 +115,7 @@ class ThirdFragment : Fragment() {
         rikishiRecyclerView.layoutManager = LinearLayoutManager(context)
         rikishiAdapter = RikishiAdapter(filteredRikishi, rikishiRecyclerView) { rikishi ->
             showRikishiDetails(rikishi)
+            clearSearchFocus() // This will unfocus the search bar
         }
         rikishiRecyclerView.adapter = rikishiAdapter
         rikishiRecyclerView.visibility = View.GONE
@@ -135,10 +135,8 @@ class ThirdFragment : Fragment() {
             }
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                if (detailContainer?.visibility == View.VISIBLE) {
-                    detailContainer?.visibility = View.GONE
-                    favouriteButtonDetail.visibility = View.GONE
-                }
+                // The wrestler's detail view is no longer hidden when the user types.
+                // It will only be replaced when a new wrestler is selected.
             }
         })
     }
@@ -187,7 +185,7 @@ class ThirdFragment : Fragment() {
 
         rikishiRecyclerView.visibility = View.GONE
         container.visibility = View.VISIBLE
-        favouriteButtonDetail.visibility = View.VISIBLE // **ACTION: Make the heart icon visible**
+        favouriteButtonDetail.visibility = View.VISIBLE
 
         val englishNameTextView: TextView = view?.findViewById(R.id.rikishiEnglishName) ?: return
         val japaneseNameTextView: TextView = view?.findViewById(R.id.rikishiJapaneseName) ?: return
@@ -196,17 +194,14 @@ class ThirdFragment : Fragment() {
         japaneseNameTextView.text = rikishi.shikonaJp ?: ""
 
         // --- FAVOURITES LOGIC ---
-        // 1. Set the initial state of the heart icon (filled or outline)
         favouriteButtonDetail.isSelected = FavouritesManager.isFavourite(requireContext(), rikishi.id)
 
-        // 2. Set the click listener to toggle the favourite status
         favouriteButtonDetail.setOnClickListener {
             val isNowFavourite = FavouritesManager.toggleFavourite(requireContext(), rikishi.id)
             it.isSelected = isNowFavourite
         }
         // --- END OF FAVOURITES LOGIC ---
 
-        // The rest of your data fetching logic remains the same
         val progressBar = view?.findViewById<ProgressBar>(R.id.progressBar)
         if (!fetchData && currentRikishiDetails != null) {
             progressBar?.visibility = View.GONE
@@ -236,7 +231,7 @@ class ThirdFragment : Fragment() {
                 Log.e("API_ERROR", "Failed to load details", e)
                 withContext(Dispatchers.Main) {
                     progressBar?.visibility = View.GONE
-                    val fallbackRikishi = createFallbackRikishi(rikishi)
+                    val fallbackRikishi = createFallbackRikishi(rikishi) // <-- FIXED HERE
                     rikishiDetailAdapter = RikishiDetailAdapter(fallbackRikishi)
                     rikishiDetailRecyclerView?.adapter = rikishiDetailAdapter
                 }

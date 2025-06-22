@@ -1,10 +1,9 @@
 package a48626.sumolmbao
 
-import android.R.attr.maxHeight
 import android.content.Context
 import android.util.AttributeSet
-import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import a48626.sumolmbao.R // Import your R file to access custom attributes
 
 class MaxHeightRecyclerView @JvmOverloads constructor(
     context: Context,
@@ -15,8 +14,12 @@ class MaxHeightRecyclerView @JvmOverloads constructor(
     private var maxHeight = 0
 
     init {
-        // Convert 240dp to pixels
-        maxHeight = (240 * context.resources.displayMetrics.density).toInt()
+        val a = context.obtainStyledAttributes(attrs, R.styleable.MaxHeightRecyclerView, defStyleAttr, 0)
+        try {
+            maxHeight = a.getDimensionPixelSize(R.styleable.MaxHeightRecyclerView_maxHeight, (240 * context.resources.displayMetrics.density).toInt())
+        } finally {
+            a.recycle()
+        }
     }
 
     override fun onMeasure(widthSpec: Int, heightSpec: Int) {

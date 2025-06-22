@@ -43,4 +43,13 @@ object FavouritesManager {
         saveFavourites(context, favourites)
         return isNowFavourite
     }
+
+    fun exportFavourites(context: Context): String {
+        return getFavouriteRikishiIds(context).joinToString(",")
+    }
+
+    fun importFavourites(context: Context, data: String) {
+        val favouriteIds = data.split(",").filter { it.isNotBlank() }.toSet()
+        saveFavourites(context, favouriteIds)
+    }
 }
