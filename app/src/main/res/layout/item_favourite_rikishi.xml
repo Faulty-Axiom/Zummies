@@ -1,4 +1,3 @@
-<!-- app/src/main/res/layout/item_favourite_rikishi.xml -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -49,5 +48,28 @@
         android:textColor="@android:color/white"
         android:gravity="center"
         android:layout_marginTop="4dp"
-        android:visibility="gone" /> <!-- Initially hidden -->
+        android:visibility="gone" />
+
+    <LinearLayout
+        android:id="@+id/tournamentGridContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginTop="8dp"
+        android:visibility="gone"> <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/past_results_title"
+        android:textColor="@android:color/white"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:gravity="center_horizontal"
+        android:paddingBottom="4dp"/>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/tournamentGridView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:nestedScrollingEnabled="false" /> </LinearLayout>
+
 </LinearLayout>

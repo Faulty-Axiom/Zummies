@@ -1,9 +1,10 @@
-// app/src/main/java/a48626/sumolmbao/second_fragment/FavouritesAdapter.kt
+// app/src/main/java/a48626/sumolmbao/favourites/FavouritesAdapter.kt
 package a48626.sumolmbao.favourites
 
 import a48626.sumolmbao.R
 import a48626.sumolmbao.data.Rikishi
 import a48626.sumolmbao.data.RikishiDetails
+import a48626.sumolmbao.data.TournamentResultDisplayData // Import for new argument
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,10 +12,14 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
 class FavouritesAdapter(
-    private var favouriteRikishiList: List<RikishiDetails>,
+    // Change private to internal to allow access from SecondFragment
+    internal var favouriteRikishiList: List<RikishiDetails>,
     private var lastTournamentBanzukeMap: Map<Int, Rikishi>? = null,
     private val onCheckScoreClick: (RikishiDetails, TextView) -> Unit,
-    private var cachedPreviousTournamentScores: Map<Int, String> // In-memory cache
+    private var cachedPreviousTournamentScores: Map<Int, String>,
+    // Add these two new parameters to the constructor
+    private var cachedTournamentHistory: Map<Int, List<TournamentResultDisplayData>>,
+    private var gridVisibilityState: Map<Int, Boolean>
 ) : RecyclerView.Adapter<FavouritesAdapter.FavouriteViewHolder>() {
 
     inner class FavouriteViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -52,10 +57,17 @@ class FavouritesAdapter(
 
     override fun getItemCount(): Int = favouriteRikishiList.size
 
-    fun updateData(newFavourites: List<RikishiDetails>, newBanzukeMap: Map<Int, Rikishi>? = null, newCachedPreviousTournamentScores: Map<Int, String>) {
+    fun updateData(newFavourites: List<RikishiDetails>,
+                   newBanzukeMap: Map<Int, Rikishi>? = null,
+                   newCachedPreviousTournamentScores: Map<Int, String>,
+        // Add these to updateData as well
+                   newCachedTournamentHistory: Map<Int, List<TournamentResultDisplayData>>,
+                   newGridVisibilityState: Map<Int, Boolean>) {
         favouriteRikishiList = newFavourites
         lastTournamentBanzukeMap = newBanzukeMap
         cachedPreviousTournamentScores = newCachedPreviousTournamentScores
+        cachedTournamentHistory = newCachedTournamentHistory // Update the map
+        gridVisibilityState = newGridVisibilityState // Update the map
         notifyDataSetChanged()
     }
 

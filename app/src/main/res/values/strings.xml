@@ -41,4 +41,5 @@
     <string name="kimarite_meaning">Winning technique</string>
     <string name="rikishi_image">Rikishi Image</string>
     <string name="check_score">View Score</string>
+    <string name="past_results_title">Past Result</string>
 </resources>

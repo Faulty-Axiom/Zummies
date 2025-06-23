@@ -42,3 +42,17 @@ data class RikishiStats(
     val yusho: Int,
     val yushoByDivision: Map<String, Int>
 )
+
+data class RankChange(
+    val id: String,
+    val bashoId: String,
+    val rikishiId: Int,
+    val rankValue: Int,
+    val rank: String
+)
+
+data class TournamentResultDisplayData(
+    val rank: String,
+    val score: String,
+    val date: String
+)

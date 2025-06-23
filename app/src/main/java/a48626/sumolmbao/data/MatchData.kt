@@ -1,8 +1,11 @@
 package a48626.sumolmbao.data
 
+import com.google.gson.annotations.SerializedName
+
 data class RikishiMatchesResponse(
     val kimariteLosses: Map<String, Int>,
     val kimariteWins: Map<String, Int>,
+    @SerializedName("records")
     val matches: List<RikishiMatch>,
     val opponentWins: Int,
     val rikishiWins: Int,
