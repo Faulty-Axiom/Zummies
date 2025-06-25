@@ -1,4 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
@@ -33,22 +35,14 @@
             android:textColor="@color/white"
             android:textSize="14sp"
             android:background="@drawable/button_background_rounded"
+            android:foreground="@drawable/rounded_button_ripple"
+            android:gravity="center"
             android:paddingHorizontal="12dp"
             android:paddingVertical="6dp"
-            android:gravity="center"
+            android:elevation="4dp"
             android:clickable="true"
             android:focusable="true" />
     </LinearLayout>
-
-    <TextView
-        android:id="@+id/rikishiScore"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textSize="14sp"
-        android:textColor="@android:color/white"
-        android:gravity="center"
-        android:layout_marginTop="4dp"
-        android:visibility="gone" />
 
     <LinearLayout
         android:id="@+id/tournamentGridContainer"
@@ -56,20 +50,30 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:layout_marginTop="8dp"
-        android:visibility="gone"> <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/past_results_title"
-        android:textColor="@android:color/white"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        android:gravity="center_horizontal"
-        android:paddingBottom="4dp"/>
+        android:visibility="gone"
+        android:gravity="center_horizontal">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/past_results_title"
+            android:textColor="@android:color/white"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:gravity="center_horizontal"
+            android:paddingBottom="4dp"/>
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/tournamentGridView"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:nestedScrollingEnabled="false" /> </LinearLayout>
+            android:nestedScrollingEnabled="false" />
+    </LinearLayout>
 
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rikishiBoutsRecyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:visibility="gone" />
 </LinearLayout>

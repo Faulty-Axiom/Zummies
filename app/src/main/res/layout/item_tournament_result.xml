@@ -1,17 +1,16 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="100dp" android:layout_height="wrap_content"
+    android:layout_width="45dp"
+    android:layout_height="wrap_content"
     android:orientation="vertical"
     android:gravity="center"
-    android:padding="4dp"
-    android:layout_margin="2dp"
-    android:background="@drawable/button_background_rectangle">
+    android:layout_margin="1dp">
 
     <TextView
         android:id="@+id/tournamentRank"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textColor="@android:color/white"
-        android:textSize="14sp"
+        android:textSize="16sp"
         android:textStyle="bold"
         android:gravity="center"
         android:text="Rank" />
@@ -21,7 +20,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textColor="@android:color/white"
-        android:textSize="12sp"
+        android:textSize="14sp"
         android:gravity="center"
         android:layout_marginTop="2dp"
         android:text="W-L-A" />
@@ -31,7 +30,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textColor="@android:color/white"
-        android:textSize="10sp"
+        android:textSize="12sp"
         android:gravity="center"
         android:layout_marginTop="2dp"
         android:text="Month YY" />

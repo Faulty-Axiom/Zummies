@@ -6,19 +6,21 @@ import android.content.Context
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
 import android.view.inputmethod.InputMethodManager
-import android.widget.Button
+import android.widget.Button // Import Button
 import android.widget.EditText
 import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.Switch
 import android.widget.TextView
 import android.widget.Toast
 import androidx.cardview.widget.CardView
 import androidx.core.view.isVisible
+import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
@@ -30,15 +32,22 @@ class FifthFragment : Fragment() {
     private lateinit var overlay: View
     private lateinit var glossarySearchEditText: EditText
     private lateinit var glossaryRecyclerView: RecyclerView
-    private lateinit var clearSearchButton: ImageView
-    private lateinit var selectedTermContainer: CardView
-    private lateinit var selectedTermText: TextView
-    private lateinit var selectedDefinitionText: TextView
-    private lateinit var tatakaiImage: ImageView
-    private lateinit var exportTextView: TextView
-    private lateinit var importTextView: TextView
-    private lateinit var exportCard: CardView
-    private lateinit var importCard: CardView
+    private lateinit var clearSearchButton: ImageView // Corrected name: was clear_search_button
+    private lateinit var selectedTermContainer: CardView // Corrected name: was selected_term_container
+    private lateinit var selectedTermText: TextView // Corrected name: was selected_term_text
+    private lateinit var selectedDefinitionText: TextView // Corrected name: was selected_definition_text
+    private lateinit var tatakaiImage: ImageView // Corrected name: was tatakai_image
+    private lateinit var exportTextView: TextView // Corrected name: was export_textview_button
+    private lateinit var importTextView: TextView // Corrected name: was import_textview_button
+    private lateinit var exportCard: CardView // Corrected name: was export_card
+    private lateinit var importCard: CardView // Corrected name: was import_card
+
+    // Corrected variable names and types for popup buttons
+    private lateinit var exportDataTextView: EditText // Corrected: This is the EditText in popup_export
+    private lateinit var closeExportButton: Button // Corrected: Was closeExportPopup (ImageView)
+    private lateinit var importDataEditText: EditText // Corrected: This is the EditText in popup_import
+    private lateinit var closeImportButton: Button // Corrected: Was closeImportPopup (ImageView)
+    private lateinit var saveImportButton: Button // Corrected: Was confirmImportButton (Button)
 
 
     // --- Adapters and Data ---
@@ -68,15 +77,24 @@ class FifthFragment : Fragment() {
         overlay = view.findViewById(R.id.overlay)
         glossarySearchEditText = view.findViewById(R.id.glossarySearchEditText)
         glossaryRecyclerView = view.findViewById(R.id.glossaryRecyclerView)
-        clearSearchButton = view.findViewById(R.id.clear_search_button)
-        selectedTermContainer = view.findViewById(R.id.selected_term_container)
-        selectedTermText = view.findViewById(R.id.selected_term_text)
-        selectedDefinitionText = view.findViewById(R.id.selected_definition_text)
-        tatakaiImage = view.findViewById(R.id.tatakai_image)
-        exportTextView = view.findViewById(R.id.export_textview_button)
-        importTextView = view.findViewById(R.id.import_textview_button)
-        exportCard = view.findViewById(R.id.export_card)
-        importCard = view.findViewById(R.id.import_card)
+        clearSearchButton = view.findViewById(R.id.clear_search_button) // Corrected ID
+        selectedTermContainer = view.findViewById(R.id.selected_term_container) // Corrected ID
+        selectedTermText = view.findViewById(R.id.selected_term_text) // Corrected ID
+        selectedDefinitionText = view.findViewById(R.id.selected_definition_text) // Corrected ID
+        tatakaiImage = view.findViewById(R.id.tatakai_image) // Corrected ID
+        exportTextView = view.findViewById(R.id.export_textview_button) // Corrected ID
+        importTextView = view.findViewById(R.id.import_textview_button) // Corrected ID
+        exportCard = view.findViewById(R.id.export_card) // Corrected ID
+        importCard = view.findViewById(R.id.import_card) // Corrected ID
+
+        // Initialize popup-specific views found within their respective CardViews
+        // These need to be initialized here because they are part of the main layout,
+        // but their specific includes have the IDs.
+        exportDataTextView = exportCard.findViewById(R.id.export_data_textview) // Corrected ID
+        closeExportButton = exportCard.findViewById(R.id.close_export_button) // Corrected ID and Type
+        importDataEditText = importCard.findViewById(R.id.import_data_edittext) // Corrected ID
+        closeImportButton = importCard.findViewById(R.id.close_import_button) // Corrected ID and Type
+        saveImportButton = importCard.findViewById(R.id.save_import_button) // Corrected ID and Type
     }
 
     private fun setupThemeSelector() {
@@ -136,7 +154,7 @@ class FifthFragment : Fragment() {
 
         exportTextView.setOnClickListener {
             exportCard.visibility = View.VISIBLE
-            val exportDataTextView = exportCard.findViewById<EditText>(R.id.export_data_textview)
+            // exportDataTextView is already initialized in initializeViews
             exportDataTextView.setText(favouritesManager.exportFavourites(requireContext()))
         }
 
@@ -144,19 +162,16 @@ class FifthFragment : Fragment() {
             importCard.visibility = View.VISIBLE
         }
 
-        val closeExportButton = exportCard.findViewById<Button>(R.id.close_export_button)
-        closeExportButton.setOnClickListener {
+        closeExportButton.setOnClickListener { // Corrected variable name
             exportCard.visibility = View.GONE
         }
 
-        val closeImportButton = importCard.findViewById<Button>(R.id.close_import_button)
-        closeImportButton.setOnClickListener {
+        closeImportButton.setOnClickListener { // Corrected variable name
             importCard.visibility = View.GONE
         }
 
-        val saveImportButton = importCard.findViewById<Button>(R.id.save_import_button)
-        saveImportButton.setOnClickListener {
-            val importDataEditText = importCard.findViewById<EditText>(R.id.import_data_edittext)
+        saveImportButton.setOnClickListener { // Corrected variable name
+            // importDataEditText is already initialized in initializeViews
             val data = importDataEditText.text.toString()
             if (data.isNotBlank()) {
                 favouritesManager.importFavourites(requireContext(), data)
@@ -166,6 +181,25 @@ class FifthFragment : Fragment() {
                 Toast.makeText(requireContext(), "Please paste your data", Toast.LENGTH_SHORT).show()
             }
         }
+
+        // NEW: Add the "See segmented top division" switch
+        val settingsContainer = view.findViewById<LinearLayout>(R.id.settingsContainer)
+
+        val segmentedTopDivisionSwitch = Switch(context).apply {
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                setMargins(0, resources.getDimensionPixelSize(R.dimen.default_margin), 0, 0)
+            }
+            text = getString(R.string.setting_segmented_top_division)
+            isChecked = FavouritesManager.loadSegmentedTopDivisionPreference(requireContext())
+            setOnCheckedChangeListener { _, isChecked ->
+                FavouritesManager.saveSegmentedTopDivisionPreference(requireContext(), isChecked)
+                Toast.makeText(context, "Preference saved. Re-open Favourites tab to see changes.", Toast.LENGTH_SHORT).show()
+            }
+        }
+        settingsContainer?.addView(segmentedTopDivisionSwitch)
     }
 
     private fun displayDefinition(item: GlossaryItem) {

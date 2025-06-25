@@ -163,8 +163,6 @@ class FirstFragment : Fragment() {
             }
         })
 
-        // --- END OF NEW TOUCH LOGIC ---
-
         overlay.setOnClickListener {
             hideRecyclerViewWithAnimation(yearRecyclerView)
             hideRecyclerViewWithAnimation(monthRecyclerView)

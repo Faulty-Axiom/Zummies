@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="8dp"
+    android:layout_marginVertical="4dp"
+    android:background="@drawable/button_background_rectangle"
+    android:clickable="true"
+    android:focusable="true">
+
+    <TextView
+        android:id="@+id/dateText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@android:color/white"
+        android:textSize="12sp"
+        android:layout_marginStart="8dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:text="Jan '24 - Day 1"/>
+
+    <TextView
+        android:id="@+id/eastShikona"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="East Rikishi"
+        android:textColor="@android:color/white"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:gravity="end"
+        android:layout_marginEnd="8dp"
+        app:layout_constraintEnd_toStartOf="@+id/eastCircle"
+        app:layout_constraintTop_toBottomOf="@id/dateText"
+        app:layout_constraintHorizontal_weight="1"
+        android:layout_marginTop="8dp"/>
+
+    <TextView
+        android:id="@+id/eastRank"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="E M1"
+        android:textColor="@android:color/darker_gray"
+        android:textSize="12sp"
+        android:gravity="end"
+        android:layout_marginEnd="8dp"
+        app:layout_constraintEnd_toStartOf="@+id/eastCircle"
+        app:layout_constraintTop_toBottomOf="@+id/eastShikona"
+        app:layout_constraintHorizontal_weight="1" />
+
+    <View
+        android:id="@+id/eastCircle"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:background="@drawable/circle_winner"
+        android:layout_marginEnd="8dp"
+        app:layout_constraintEnd_toStartOf="@+id/centerDivider"
+        app:layout_constraintTop_toTopOf="@id/eastShikona"
+        app:layout_constraintBottom_toBottomOf="@id/westRank"/>
+
+    <View
+        android:id="@+id/westCircle"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:background="@drawable/circle_loser"
+        android:layout_marginStart="8dp"
+        app:layout_constraintStart_toEndOf="@+id/centerDivider"
+        app:layout_constraintTop_toTopOf="@id/westShikona"
+        app:layout_constraintBottom_toBottomOf="@id/westRank"/>
+
+    <TextView
+        android:id="@+id/westShikona"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="West Rikishi"
+        android:textColor="@android:color/white"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:gravity="start"
+        android:layout_marginStart="8dp"
+        app:layout_constraintStart_toEndOf="@+id/westCircle"
+        app:layout_constraintTop_toBottomOf="@id/dateText"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_weight="1"
+        android:layout_marginTop="8dp"/>
+
+    <TextView
+        android:id="@+id/westRank"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="W M1"
+        android:textColor="@android:color/darker_gray"
+        android:textSize="12sp"
+        android:gravity="start"
+        android:layout_marginStart="8dp"
+        app:layout_constraintStart_toEndOf="@+id/westCircle"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/westShikona"
+        app:layout_constraintHorizontal_weight="1" />
+
+    <TextView
+        android:id="@+id/technique"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Oshidashi"
+        android:textColor="@color/bottom_top_colour"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/eastRank"
+        android:layout_marginTop="8dp"/>
+
+    <View
+        android:id="@+id/centerDivider"
+        android:layout_width="1dp"
+        android:layout_height="0dp"
+        android:background="@android:color/darker_gray"
+        android:layout_marginHorizontal="8dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/eastShikona"
+        app:layout_constraintBottom_toBottomOf="@id/westRank"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

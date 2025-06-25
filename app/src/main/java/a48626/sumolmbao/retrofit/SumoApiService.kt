@@ -4,8 +4,10 @@ import a48626.sumolmbao.data.Banzuke
 import a48626.sumolmbao.data.Basho
 import a48626.sumolmbao.data.RankChange
 import a48626.sumolmbao.data.RikishiId
+import a48626.sumolmbao.data.RikishiMatchesListResponse
 import a48626.sumolmbao.data.RikishiMatchesResponse
 import a48626.sumolmbao.data.RikishiStats
+import a48626.sumolmbao.data.RikishiVersusMatchesResponse
 import a48626.sumolmbao.data.Rikishis
 import a48626.sumolmbao.data.TorikumiResponse
 import retrofit2.Call
@@ -62,14 +64,14 @@ interface SumoApiService
     @GET("api/rikishi/{rikishiId}/matches")
     suspend fun getRikishiMatches(
         @Path("rikishiId") rikishiId: Int
-    ): RikishiMatchesResponse
+    ): RikishiMatchesListResponse
 
     @GET("api/rikishi/{rikishiId}/matches/{opponentId}")
     suspend fun getRikishiVersusMatches(
         @Path("rikishiId") rikishiId: Int,
         @Path("opponentId") opponentId: Int,
         @Query("bashoId") bashoId: String? = null
-    ): RikishiMatchesResponse
+    ): RikishiVersusMatchesResponse
 
     @GET("api/ranks")
     suspend fun getRanks(

@@ -1,73 +1,115 @@
-// app/src/main/java/a48626/sumolmbao/favourites/FavouritesAdapter.kt
 package a48626.sumolmbao.favourites
 
+import a48626.sumolmbao.DisplayItem
 import a48626.sumolmbao.R
 import a48626.sumolmbao.data.Rikishi
 import a48626.sumolmbao.data.RikishiDetails
-import a48626.sumolmbao.data.TournamentResultDisplayData // Import for new argument
+import a48626.sumolmbao.data.TournamentResultDisplayData
+import a48626.sumolmbao.second_fragment.TournamentResultAdapter
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
 class FavouritesAdapter(
-    // Change private to internal to allow access from SecondFragment
-    internal var favouriteRikishiList: List<RikishiDetails>,
+    internal var favouriteRikishiList: List<DisplayItem>,
     private var lastTournamentBanzukeMap: Map<Int, Rikishi>? = null,
-    private val onCheckScoreClick: (RikishiDetails, TextView) -> Unit,
-    private var cachedPreviousTournamentScores: Map<Int, String>,
-    // Add these two new parameters to the constructor
+    private val onCheckScoreClick: (RikishiDetails) -> Unit,
     private var cachedTournamentHistory: Map<Int, List<TournamentResultDisplayData>>,
-    private var gridVisibilityState: Map<Int, Boolean>
-) : RecyclerView.Adapter<FavouritesAdapter.FavouriteViewHolder>() {
+    private var gridVisibilityState: Map<Int, Boolean>,
+    // ADDED: The missing onDivisionHeaderClick parameter
+    private val onDivisionHeaderClick: (String) -> Unit // This line was missing
+) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-    inner class FavouriteViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    private val TYPE_RIKISHI = 0
+    private val TYPE_DIVISION_SEPARATOR = 1
+
+    inner class RikishiViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val rikishiName: TextView = itemView.findViewById(R.id.rikishiName)
-        val rikishiScore: TextView = itemView.findViewById(R.id.rikishiScore)
         val checkScoreButton: TextView = itemView.findViewById(R.id.checkScoreButton)
+        val tournamentGridContainer: LinearLayout = itemView.findViewById(R.id.tournamentGridContainer)
+        val tournamentGridView: RecyclerView = itemView.findViewById(R.id.tournamentGridView)
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FavouriteViewHolder {
-        val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.item_favourite_rikishi, parent, false)
-        return FavouriteViewHolder(view)
+    inner class DivisionSeparatorViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        val divisionNameTextView: TextView = itemView.findViewById(R.id.divisionNameTextView)
     }
 
-    override fun onBindViewHolder(holder: FavouriteViewHolder, position: Int) {
-        val rikishiDetails = favouriteRikishiList[position]
-        holder.rikishiName.text = rikishiDetails.shikonaEn
-
-        // ONLY show score if it's explicitly cached from a 'Check Score' button click
-        val cachedScore = cachedPreviousTournamentScores[rikishiDetails.id]
-        if (cachedScore != null) {
-            holder.rikishiScore.text = cachedScore
-            holder.rikishiScore.visibility = View.VISIBLE
-        } else {
-            // If not explicitly cached, ensure it's hidden on initial bind or re-bind
-            holder.rikishiScore.visibility = View.GONE
-            holder.rikishiScore.text = "" // Clear any stale text to prevent showing old data
+    override fun getItemViewType(position: Int): Int {
+        return when (favouriteRikishiList[position]) {
+            is DisplayItem.RikishiDisplayItem -> TYPE_RIKISHI
+            is DisplayItem.DivisionSeparatorItem -> TYPE_DIVISION_SEPARATOR
         }
+    }
 
-        // Set up click listener for the new button
-        holder.checkScoreButton.setOnClickListener {
-            onCheckScoreClick(rikishiDetails, holder.rikishiScore)
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+        return when (viewType) {
+            TYPE_RIKISHI -> {
+                val view = LayoutInflater.from(parent.context)
+                    .inflate(R.layout.item_favourite_rikishi, parent, false)
+                RikishiViewHolder(view)
+            }
+            TYPE_DIVISION_SEPARATOR -> {
+                val view = LayoutInflater.from(parent.context)
+                    .inflate(R.layout.item_division_separator, parent, false)
+                DivisionSeparatorViewHolder(view)
+            }
+            else -> throw IllegalArgumentException("Invalid view type: $viewType")
+        }
+    }
+
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        when (val item = favouriteRikishiList[position]) {
+            is DisplayItem.RikishiDisplayItem -> {
+                val rikishiDetails = item.rikishiDetails
+                val rikishiHolder = holder as RikishiViewHolder
+
+                var displayName = rikishiDetails.shikonaEn
+                val isRetired = rikishiDetails.currentRank?.contains("Retired", ignoreCase = true) == true || rikishiDetails.intai == true
+                if (!isRetired && !rikishiDetails.currentRank.isNullOrBlank()) {
+                    displayName += " - ${rikishiDetails.currentRank}"
+                } else if (isRetired) {
+                    displayName += " - Retired"
+                }
+                rikishiHolder.rikishiName.text = displayName
+
+                val isGridVisible = gridVisibilityState[rikishiDetails.id] == true
+                if (isGridVisible && cachedTournamentHistory.containsKey(rikishiDetails.id)) {
+                    rikishiHolder.tournamentGridContainer.visibility = View.VISIBLE
+                    rikishiHolder.tournamentGridView.adapter = TournamentResultAdapter(cachedTournamentHistory[rikishiDetails.id] ?: emptyList())
+                    rikishiHolder.tournamentGridView.layoutManager = LinearLayoutManager(rikishiHolder.itemView.context, LinearLayoutManager.HORIZONTAL, false)
+                } else {
+                    rikishiHolder.tournamentGridContainer.visibility = View.GONE
+                }
+
+                rikishiHolder.checkScoreButton.setOnClickListener {
+                    onCheckScoreClick(rikishiDetails)
+                }
+            }
+            is DisplayItem.DivisionSeparatorItem -> {
+                val separatorHolder = holder as DivisionSeparatorViewHolder
+                separatorHolder.divisionNameTextView.text = item.divisionName
+                // ADDED: Click listener for the division separator
+                separatorHolder.itemView.setOnClickListener {
+                    onDivisionHeaderClick(item.divisionName)
+                }
+            }
         }
     }
 
     override fun getItemCount(): Int = favouriteRikishiList.size
 
-    fun updateData(newFavourites: List<RikishiDetails>,
+    fun updateData(newFavourites: List<DisplayItem>,
                    newBanzukeMap: Map<Int, Rikishi>? = null,
-                   newCachedPreviousTournamentScores: Map<Int, String>,
-        // Add these to updateData as well
                    newCachedTournamentHistory: Map<Int, List<TournamentResultDisplayData>>,
                    newGridVisibilityState: Map<Int, Boolean>) {
         favouriteRikishiList = newFavourites
         lastTournamentBanzukeMap = newBanzukeMap
-        cachedPreviousTournamentScores = newCachedPreviousTournamentScores
-        cachedTournamentHistory = newCachedTournamentHistory // Update the map
-        gridVisibilityState = newGridVisibilityState // Update the map
+        cachedTournamentHistory = newCachedTournamentHistory
+        gridVisibilityState = newGridVisibilityState
         notifyDataSetChanged()
     }
 

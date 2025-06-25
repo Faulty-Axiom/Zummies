@@ -1,5 +1,8 @@
 package a48626.sumolmbao.data
 
+import com.google.gson.annotations.SerializedName
+import java.io.Serializable
+
 data class RikishiId(
     val id: Int,
     val sumodbId: Int,
@@ -17,7 +20,7 @@ data class RikishiId(
     val ranks: List<RankHistory>? = null,
     val shikonaHistory: List<ShikonaHistory>? = null,
     val intai: String? = null
-)
+) : Serializable
 
 data class ShikonaHistory(
     val id: String,
@@ -41,7 +44,7 @@ data class RikishiStats(
     val winsByDivision: Map<String, Int>,
     val yusho: Int,
     val yushoByDivision: Map<String, Int>
-)
+) : Serializable
 
 data class RankChange(
     val id: String,
@@ -49,10 +52,18 @@ data class RankChange(
     val rikishiId: Int,
     val rankValue: Int,
     val rank: String
-)
+) : Serializable
 
 data class TournamentResultDisplayData(
     val rank: String,
     val score: String,
     val date: String
-)
+) : Serializable
+
+data class RikishiMatchesListResponse(
+    val limit: Int,
+    val skip: Int,
+    val total: Int,
+    @SerializedName("records")
+    val matches: List<RikishiMatch>?
+) : Serializable

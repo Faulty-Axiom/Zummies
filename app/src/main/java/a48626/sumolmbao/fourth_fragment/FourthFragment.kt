@@ -2,7 +2,7 @@ package a48626.sumolmbao.fourth_fragment
 
 import a48626.sumolmbao.R
 import a48626.sumolmbao.data.RikishiDetails
-import a48626.sumolmbao.data.RikishiMatchesResponse
+import a48626.sumolmbao.data.RikishiVersusMatchesResponse // NEW: Import RikishiVersusMatchesResponse
 import a48626.sumolmbao.database.RikishiDatabase
 import a48626.sumolmbao.database.RikishiDao
 import a48626.sumolmbao.database.toRikishiDetails
@@ -23,6 +23,7 @@ import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.ProgressBar
 import android.widget.TextView
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -58,7 +59,7 @@ class FourthFragment : Fragment() {
 
     private var selectedRikishi1: RikishiDetails? = null
     private var selectedRikishi2: RikishiDetails? = null
-    private var currentMatchesResponse: RikishiMatchesResponse? = null
+    private var currentMatchesResponse: RikishiVersusMatchesResponse? = null // CHANGED: Type to RikishiVersusMatchesResponse
 
     private var searchJob1: Job? = null
     private var searchJob2: Job? = null
@@ -84,6 +85,7 @@ class FourthFragment : Fragment() {
         setupSearchListeners()
         setupOutsideClickHandler(view)
 
+        // Ensure currentMatchesResponse is cast correctly if not null
         if (selectedRikishi1 != null && selectedRikishi2 != null && currentMatchesResponse != null) {
             displayMatchesResults(currentMatchesResponse!!)
         }
@@ -286,10 +288,8 @@ class FourthFragment : Fragment() {
         }
     }
 
-    private fun selectRikishi(searchType: Int, rikishi: RikishiDetails)
-    {
-        when (searchType)
-        {
+    private fun selectRikishi(searchType: Int, rikishi: RikishiDetails) {
+        when (searchType) {
             1 -> {
                 selectedRikishi1 = rikishi
                 searchRikishi1.setText(rikishi.shikonaEn?.replace("#", ""))
@@ -302,10 +302,8 @@ class FourthFragment : Fragment() {
             }
         }
 
-        if (selectedRikishi1 != null && selectedRikishi2 != null && currentMatchesResponse == null) {
+        if (selectedRikishi1 != null && selectedRikishi2 != null) {
             fetchHeadToHeadMatches()
-        } else if (selectedRikishi1 != null && selectedRikishi2 != null) {
-            currentMatchesResponse?.let { displayMatchesResults(it) }
         }
     }
 
@@ -318,7 +316,11 @@ class FourthFragment : Fragment() {
 
         lifecycleScope.launch {
             try {
-                val matchesResponse = withContext(Dispatchers.IO) {
+                currentMatchesResponse = null
+
+                Log.d("FourthFragment", "Fetching H2H for Rikishi1 ID: ${rikishi1.id}, Rikishi2 ID: ${rikishi2.id}")
+
+                val matchesResponse: RikishiVersusMatchesResponse = withContext(Dispatchers.IO) { // CHANGED: Declare type
                     RetrofitInstance.api.getRikishiVersusMatches(rikishi1.id, rikishi2.id)
                 }
                 withContext(Dispatchers.Main) {
@@ -326,9 +328,12 @@ class FourthFragment : Fragment() {
                     displayMatchesResults(matchesResponse)
                 }
             } catch (e: Exception) {
+                Log.e("FourthFragment", "Error fetching head-to-head matches: ${e.message}", e)
                 withContext(Dispatchers.Main) {
                     progressBar.visibility = View.GONE
-                    // Handle error
+                    Toast.makeText(context, "Error loading matches: ${e.message}", Toast.LENGTH_LONG).show()
+                    matchesAdapter.updateData(emptyList())
+                    matchesRecyclerView.visibility = View.GONE
                 }
             }
         }
@@ -339,7 +344,8 @@ class FourthFragment : Fragment() {
         savedInstanceState?.let {
             selectedRikishi1 = it.getParcelable("selectedRikishi1")
             selectedRikishi2 = it.getParcelable("selectedRikishi2")
-            currentMatchesResponse = it.getParcelable("currentMatchesResponse")
+            // Ensure currentMatchesResponse is cast to the correct type
+            currentMatchesResponse = it.getParcelable("currentMatchesResponse") as? RikishiVersusMatchesResponse
 
             selectedRikishi1?.let { rikishi ->
                 searchRikishi1.setText(rikishi.shikonaEn?.replace("#", ""))
@@ -354,11 +360,12 @@ class FourthFragment : Fragment() {
         super.onSaveInstanceState(outState)
         outState.putParcelable("selectedRikishi1", selectedRikishi1 as Parcelable?)
         outState.putParcelable("selectedRikishi2", selectedRikishi2 as Parcelable?)
+        // Ensure currentMatchesResponse is saved as the correct type
         outState.putParcelable("currentMatchesResponse", currentMatchesResponse as Parcelable?)
     }
 
     @SuppressLint("SetTextI18n")
-    private fun displayMatchesResults(response: RikishiMatchesResponse) {
+    private fun displayMatchesResults(response: RikishiVersusMatchesResponse) { // CHANGED: Parameter type
         currentMatchesResponse = response
 
         val rikishi1 = getFirstName(selectedRikishi1?.shikonaEn?.replace("#", ""))
@@ -371,13 +378,21 @@ class FourthFragment : Fragment() {
 
         kimariteSummaryText.text = buildKimariteSummary(rikishi1, rikishi2, response)
 
-        matchesAdapter.updateData(response.matches)
+        val matchesToDisplay = response.matches ?: emptyList()
+        Log.d("FourthFragment", "displayMatchesResults: matchesToDisplay size = ${matchesToDisplay.size}")
+
+        matchesAdapter.updateData(matchesToDisplay)
+
         summaryContainer.visibility = View.VISIBLE
-        matchesRecyclerView.visibility = View.VISIBLE
+        if (matchesToDisplay.isNotEmpty()) {
+            matchesRecyclerView.visibility = View.VISIBLE
+        } else {
+            matchesRecyclerView.visibility = View.GONE
+            Toast.makeText(context, "No individual match details found for this pair.", Toast.LENGTH_LONG).show()
+        }
     }
 
-    private fun showTooltip(anchorView: View, text: String)
-    {
+    private fun showTooltip(anchorView: View, text: String) {
         if (tooltipView == null) {
             tooltipView = TextView(requireContext()).apply {
                 layoutParams = ViewGroup.LayoutParams(
@@ -409,7 +424,6 @@ class FourthFragment : Fragment() {
             visibility = View.VISIBLE
         }
 
-        // Show the overlay to dim the screen
         view?.findViewById<FrameLayout>(R.id.overlay_container)?.visibility = View.VISIBLE
     }
 
@@ -421,13 +435,13 @@ class FourthFragment : Fragment() {
     private fun Int.dpToPx(): Int = (this * resources.displayMetrics.density).toInt()
 
     private fun getFirstName(fullName: String?): String {
-        return fullName?.split(" ")?.firstOrNull() ?: ""
+        return fullName?.replace("#", "")?.split(" ")?.firstOrNull() ?: ""
     }
 
     private fun buildKimariteSummary(
         rikishi1: String,
         rikishi2: String,
-        response: RikishiMatchesResponse
+        response: RikishiVersusMatchesResponse // CHANGED: Parameter type
     ): String {
         val topWinTechniques = response.kimariteWins.entries
             .sortedByDescending { it.value }
@@ -511,7 +525,7 @@ class FourthFragment : Fragment() {
         "Uchigake" to "Inner hook",
         "Uchimuso" to "Inner thigh scoop",
         "Ushiromotare" to "Backward slip down",
-        "Utchari" to "Rear push out",
+        "Utchari" to "Backward pivot throw",
         "Uwatedashinage" to "Over-shoulder throw",
         "Uwatenage" to "Overarm throw",
         "Watashikomi" to "Arm entanglement",

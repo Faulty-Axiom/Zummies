@@ -3,6 +3,7 @@ package a48626.sumolmbao.fourth_fragment
 import a48626.sumolmbao.R
 import a48626.sumolmbao.data.RikishiMatch
 import android.annotation.SuppressLint
+import android.util.Log // Import Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -35,6 +36,7 @@ class MatchAdapter(private var matches: List<RikishiMatch>) : RecyclerView.Adapt
     @SuppressLint("SetTextI18n")
     override fun onBindViewHolder(holder: MatchViewHolder, position: Int) {
         val match = matches[position]
+        Log.d("MatchAdapter", "Binding match at position $position: ${match.eastShikona} vs ${match.westShikona}") // NEW: Log when binding
         val (monthName, year) = formatBashoDate(match.bashoId)
 
         fun getDisplayName(shikonaEn: String?): String {
@@ -76,10 +78,11 @@ class MatchAdapter(private var matches: List<RikishiMatch>) : RecyclerView.Adapt
 
     override fun getItemCount(): Int = matches.size
 
-    fun updateData(newMatches: List<RikishiMatch>) {
-        matches = newMatches.sortedByDescending {
+    fun updateData(newMatches: List<RikishiMatch>?) {
+        matches = (newMatches ?: emptyList()).sortedByDescending {
             it.bashoId + it.day.toString().padStart(2, '0')
         }
+        Log.d("MatchAdapter", "updateData called. New matches size: ${matches.size}") // NEW: Log update data size
         notifyDataSetChanged()
     }
 }
