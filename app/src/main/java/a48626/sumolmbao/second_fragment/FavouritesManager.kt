@@ -1,7 +1,7 @@
 package a48626.sumolmbao.favourites
 
 import a48626.sumolmbao.data.RikishiDetails
-import a48626.sumolmbao.data.RikishiMatch // NEW: Import RikishiMatch
+import a48626.sumolmbao.data.RikishiMatch
 import android.content.Context
 import android.content.SharedPreferences
 import com.google.gson.Gson
@@ -16,9 +16,11 @@ object FavouritesManager {
     private const val KEY_SELECTED_DIVISION_FILTER = "selected_division_filter"
     private const val KEY_CACHED_SORTED_FAVOURITES = "cached_sorted_favourites"
     private const val KEY_FAVOURITES_HASH = "favourites_hash"
-    // NEW: Keys for cached Rikishi bouts and their visibility
     private const val KEY_CACHED_RIKISHI_BOUTS = "cached_rikishi_bouts"
     private const val KEY_BOUTS_VISIBILITY_STATE = "bouts_visibility_state"
+    // Added for spoiler mode
+    private const val PREFS_SETTINGS = "SettingsPreferences"
+    private const val SPOILER_MODE_KEY = "SpoilerMode"
 
 
     private val gson = Gson()
@@ -117,35 +119,8 @@ object FavouritesManager {
         return getPrefs(context).getString(KEY_FAVOURITES_HASH, null)
     }
 
-    // NEW: Functions for caching Rikishi bouts
-    fun saveCachedRikishiBouts(context: Context, data: Map<Int, List<RikishiMatch>>) {
-        val json = gson.toJson(data)
-        getPrefs(context).edit().putString(KEY_CACHED_RIKISHI_BOUTS, json).apply()
-    }
-
-    fun loadCachedRikishiBouts(context: Context): Map<Int, List<RikishiMatch>>? {
-        val json = getPrefs(context).getString(KEY_CACHED_RIKISHI_BOUTS, null)
-        return if (json != null) {
-            val type = object : TypeToken<Map<Int, List<RikishiMatch>>>() {}.type
-            gson.fromJson(json, type)
-        } else {
-            null
-        }
-    }
-
-    // NEW: Functions for caching bouts visibility state
-    fun saveBoutsVisibilityState(context: Context, data: Map<Int, Boolean>) {
-        val json = gson.toJson(data)
-        getPrefs(context).edit().putString(KEY_BOUTS_VISIBILITY_STATE, json).apply()
-    }
-
-    fun loadBoutsVisibilityState(context: Context): Map<Int, Boolean>? {
-        val json = getPrefs(context).getString(KEY_BOUTS_VISIBILITY_STATE, null)
-        return if (json != null) {
-            val type = object : TypeToken<Map<Int, Boolean>>() {}.type
-            gson.fromJson(json, type)
-        } else {
-            null
-        }
+    fun loadSpoilerModePreference(context: Context): Boolean {
+        val sharedPreferences = context.getSharedPreferences(PREFS_SETTINGS, Context.MODE_PRIVATE)
+        return sharedPreferences.getBoolean(SPOILER_MODE_KEY, false)
     }
 }

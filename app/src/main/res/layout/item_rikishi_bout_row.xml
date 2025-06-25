@@ -5,9 +5,7 @@
     android:layout_height="wrap_content"
     android:padding="8dp"
     android:layout_marginVertical="4dp"
-    android:background="@drawable/button_background_rectangle"
-    android:clickable="true"
-    android:focusable="true">
+    android:background="@drawable/button_background_rectangle_black_outline">
 
     <TextView
         android:id="@+id/dateText"
@@ -103,9 +101,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Oshidashi"
-        android:textColor="@color/bottom_top_colour"
-        android:textSize="14sp"
-        android:textStyle="bold"
+        android:textColor="@color/white"
+        android:textSize="18sp"
+        android:textStyle="italic"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

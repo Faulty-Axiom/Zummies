@@ -67,14 +67,9 @@ class ThirdFragment : Fragment() {
     ): View? {
         val view = inflater.inflate(R.layout.fragment_third, container, false)
         detailContainer = view.findViewById(R.id.detailContainer)
-        rikishiDetailRecyclerView = RecyclerView(requireContext()).apply {
-            layoutManager = LinearLayoutManager(context)
-            layoutParams = ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT
-            )
-        }
-        detailContainer?.addView(rikishiDetailRecyclerView)
+        // The RecyclerView is now part of the XML, so we find it by ID
+        rikishiDetailRecyclerView = view.findViewById(R.id.rikishiDetailRecyclerView)
+        rikishiDetailRecyclerView?.layoutManager = LinearLayoutManager(context)
         detailContainer?.visibility = View.GONE
         return view
     }
@@ -82,6 +77,7 @@ class ThirdFragment : Fragment() {
     @SuppressLint("CutPasteId")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        Log.d("ThirdFragment", "onViewCreated called.")
 
         rikishiDao = RikishiDatabase.getDatabase(requireContext()).rikishiDao()
         searchEditText = view.findViewById(R.id.searchEditText)
@@ -90,8 +86,6 @@ class ThirdFragment : Fragment() {
 
         setupRecyclerView()
 
-        // When the search bar gets focus, just show the search list.
-        // The wrestler details will remain on screen until the user starts typing.
         searchEditText.setOnFocusChangeListener { _, hasFocus ->
             if (hasFocus) {
                 rikishiRecyclerView.visibility = View.VISIBLE
@@ -102,12 +96,26 @@ class ThirdFragment : Fragment() {
             clearSearchFocus()
         }
 
-        detailContainer?.isClickable = false
         setupSearchListener()
         loadCachedRikishi()
 
-        if (selectedRikishi != null && currentRikishiDetails != null) {
-            showRikishiDetails(selectedRikishi!!, false)
+        // This is the main logic to handle receiving data from the SecondFragment
+        arguments?.getSerializable("selectedRikishi")?.let { rikishi ->
+            if (rikishi is RikishiDetails) {
+                Log.d("ThirdFragment", "Received Rikishi from arguments: ${rikishi.shikonaEn}")
+                searchEditText.setText(rikishi.shikonaEn?.replace("#", ""))
+                // This is the crucial call to start fetching and displaying data
+                showRikishiDetails(rikishi, fetchData = true)
+            } else {
+                Log.e("ThirdFragment", "Argument 'selectedRikishi' is not of type RikishiDetails.")
+            }
+        } ?: run {
+            Log.d("ThirdFragment", "No 'selectedRikishi' argument found.")
+            // This handles restoring the view if the fragment was recreated
+            if (selectedRikishi != null && currentRikishiDetails != null) {
+                Log.d("ThirdFragment", "Restoring state for a previously selected Rikishi.")
+                showRikishiDetails(selectedRikishi!!, false)
+            }
         }
     }
 
@@ -115,11 +123,10 @@ class ThirdFragment : Fragment() {
         rikishiRecyclerView.layoutManager = LinearLayoutManager(context)
         rikishiAdapter = RikishiAdapter(filteredRikishi, rikishiRecyclerView) { rikishi ->
             showRikishiDetails(rikishi)
-            clearSearchFocus() // This will unfocus the search bar
+            clearSearchFocus()
         }
         rikishiRecyclerView.adapter = rikishiAdapter
         rikishiRecyclerView.visibility = View.GONE
-        rikishiRecyclerView.setHasFixedSize(true)
     }
 
     private fun setupSearchListener() {
@@ -134,10 +141,7 @@ class ThirdFragment : Fragment() {
                 }
             }
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                // The wrestler's detail view is no longer hidden when the user types.
-                // It will only be replaced when a new wrestler is selected.
-            }
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
         })
     }
 
@@ -151,15 +155,12 @@ class ThirdFragment : Fragment() {
     private fun loadCachedRikishi() {
         lifecycleScope.launch {
             try {
-                val (count, rikishiEntities) = withContext(Dispatchers.IO) {
-                    Pair(rikishiDao.getCount(), rikishiDao.getAllRikishi())
+                allRikishi = withContext(Dispatchers.IO) {
+                    rikishiDao.getAllRikishi().mapNotNull { it.toRikishiDetails() }.toMutableList()
                 }
-                if (count > 0) {
-                    allRikishi = rikishiEntities.mapNotNull { it.toRikishiDetails() }.toMutableList()
-                    withContext(Dispatchers.Main) { applyFilter("") }
-                }
+                withContext(Dispatchers.Main) { applyFilter("") }
             } catch (e: Exception) {
-                // Log error
+                Log.e("ThirdFragment", "Error loading cached rikishi", e)
             }
         }
     }
@@ -180,7 +181,8 @@ class ThirdFragment : Fragment() {
     }
 
     private fun showRikishiDetails(rikishi: RikishiDetails, fetchData: Boolean = true) {
-        selectedRikishi = rikishi // Keep track of the selected rikishi
+        Log.d("ThirdFragment", "showRikishiDetails called for ${rikishi.shikonaEn}. Fetch data: $fetchData")
+        selectedRikishi = rikishi
         val container = detailContainer ?: return
 
         rikishiRecyclerView.visibility = View.GONE
@@ -189,21 +191,19 @@ class ThirdFragment : Fragment() {
 
         val englishNameTextView: TextView = view?.findViewById(R.id.rikishiEnglishName) ?: return
         val japaneseNameTextView: TextView = view?.findViewById(R.id.rikishiJapaneseName) ?: return
+        val progressBar = view?.findViewById<ProgressBar>(R.id.progressBar)
 
         englishNameTextView.text = rikishi.shikonaEn?.replace("#", "") ?: "Unknown"
         japaneseNameTextView.text = rikishi.shikonaJp ?: ""
 
-        // --- FAVOURITES LOGIC ---
         favouriteButtonDetail.isSelected = FavouritesManager.isFavourite(requireContext(), rikishi.id)
-
         favouriteButtonDetail.setOnClickListener {
             val isNowFavourite = FavouritesManager.toggleFavourite(requireContext(), rikishi.id)
             it.isSelected = isNowFavourite
         }
-        // --- END OF FAVOURITES LOGIC ---
 
-        val progressBar = view?.findViewById<ProgressBar>(R.id.progressBar)
         if (!fetchData && currentRikishiDetails != null) {
+            Log.d("ThirdFragment", "Restoring details from memory, not fetching.")
             progressBar?.visibility = View.GONE
             rikishiDetailAdapter = RikishiDetailAdapter(currentRikishiDetails!!, currentStats, currentHighestRank)
             rikishiDetailRecyclerView?.adapter = rikishiDetailAdapter
@@ -211,15 +211,35 @@ class ThirdFragment : Fragment() {
         }
 
         progressBar?.visibility = View.VISIBLE
+        rikishiDetailRecyclerView?.adapter = null // Clear previous data
+
         lifecycleScope.launch {
             try {
+                Log.d("ThirdFragment", "Fetching details for ID: ${rikishi.id}")
                 val (detailedRikishi, stats, highestRank) = withContext(Dispatchers.IO) {
                     val detailedRikishi = RetrofitInstance.api.getRikishiById(rikishi.id, shikonas = true)
-                    val stats = try { RetrofitInstance.api.getRikishiStats(rikishi.id) } catch (e: Exception) { null }
-                    val highestRank = try { SumoDBScraper.getHighestRank(rikishi.sumodbId) } catch (e: Exception) { null }
+                    Log.d("ThirdFragment", "API getRikishiById successful.")
+                    val stats = try {
+                        RetrofitInstance.api.getRikishiStats(rikishi.id).also {
+                            Log.d("ThirdFragment", "API getRikishiStats successful.")
+                        }
+                    } catch (e: Exception) {
+                        Log.e("ThirdFragment", "API getRikishiStats failed", e)
+                        null
+                    }
+                    val highestRank = try {
+                        SumoDBScraper.getHighestRank(rikishi.sumodbId).also {
+                            Log.d("ThirdFragment", "Scraping for highest rank successful.")
+                        }
+                    } catch (e: Exception) {
+                        Log.e("ThirdFragment", "Scraping for highest rank failed", e)
+                        null
+                    }
                     Triple(detailedRikishi, stats, highestRank)
                 }
+
                 withContext(Dispatchers.Main) {
+                    Log.d("ThirdFragment", "Updating UI with fetched data.")
                     currentRikishiDetails = detailedRikishi
                     currentStats = stats
                     currentHighestRank = highestRank
@@ -228,10 +248,10 @@ class ThirdFragment : Fragment() {
                     rikishiDetailRecyclerView?.adapter = rikishiDetailAdapter
                 }
             } catch (e: Exception) {
-                Log.e("API_ERROR", "Failed to load details", e)
+                Log.e("ThirdFragment", "Failed to load details for rikishi ID ${rikishi.id}", e)
                 withContext(Dispatchers.Main) {
                     progressBar?.visibility = View.GONE
-                    val fallbackRikishi = createFallbackRikishi(rikishi) // <-- FIXED HERE
+                    val fallbackRikishi = createFallbackRikishi(rikishi)
                     rikishiDetailAdapter = RikishiDetailAdapter(fallbackRikishi)
                     rikishiDetailRecyclerView?.adapter = rikishiDetailAdapter
                 }

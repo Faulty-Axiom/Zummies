@@ -70,4 +70,5 @@ dependencies {
     implementation(platform("com.google.firebase:firebase-bom:33.15.0"))
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
+    implementation("androidx.fragment:fragment-ktx:1.6.2")
 }

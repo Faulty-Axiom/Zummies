@@ -1,5 +1,7 @@
 package a48626.sumolmbao.data
 
+import java.io.Serializable // Add this import
+
 data class Rikishis(
     val limit: Int,
     val skip: Int,
@@ -25,15 +27,15 @@ data class RikishiDetails(
     val ranks: List<RankHistory>? = null,
     val shikonas: List<ShikonaHistory>? = null,
     val intai: Boolean? = null
-)
+) : Serializable
 
 data class Measurement(
     val date: String,
     val height: Int,
     val weight: Int
-)
+): Serializable
 
 data class RankHistory(
     val date: String,
     val rank: String
-)
+): Serializable
