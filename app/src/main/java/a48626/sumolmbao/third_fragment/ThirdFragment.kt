@@ -61,6 +61,8 @@ class ThirdFragment : Fragment() {
     private var currentStats: RikishiStats? = null
     private var currentHighestRank: String? = null
 
+    var rikishiToDisplay: RikishiDetails? = null
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -85,6 +87,15 @@ class ThirdFragment : Fragment() {
         favouriteButtonDetail = view.findViewById(R.id.favourite_button_top_bar)
 
         setupRecyclerView()
+
+        rikishiToDisplay?.let { rikishi ->
+            Log.d("ThirdFragment", "New rikishi to display: ${rikishi.shikonaEn}")
+            // Use the existing functions to show the details and update the search bar
+            showRikishiDetails(rikishi, fetchData = true)
+            searchEditText.setText(rikishi.shikonaEn?.replace("#", ""))
+            // Clear the variable so it's not used again accidentally
+            rikishiToDisplay = null
+        }
 
         searchEditText.setOnFocusChangeListener { _, hasFocus ->
             if (hasFocus) {
@@ -211,7 +222,7 @@ class ThirdFragment : Fragment() {
         }
 
         progressBar?.visibility = View.VISIBLE
-        rikishiDetailRecyclerView?.adapter = null // Clear previous data
+        rikishiDetailRecyclerView?.adapter = null
 
         lifecycleScope.launch {
             try {

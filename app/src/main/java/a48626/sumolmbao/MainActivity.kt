@@ -29,13 +29,15 @@ class MainActivity : AppCompatActivity()
     private lateinit var bottomNavigationView: BottomNavigationView
     private lateinit var loadingOverlay: FrameLayout
 
-    // **FIX**: Keep instances of fragments to manage them
+    // --- Keep instances of fragments that DON'T need to be replaced ---
     private val firstFragment = FirstFragment()
     private val secondFragment = SecondFragment()
-    private val thirdFragment = ThirdFragment()
     private val fourthFragment = FourthFragment()
     private val fifthFragment = FifthFragment()
-    private var activeFragment: Fragment = secondFragment // Default fragment
+
+    // --- ThirdFragment will be nullable and created on-demand ---
+    private var thirdFragment: ThirdFragment? = null
+    private var activeFragment: Fragment = secondFragment
 
     override fun onCreate(savedInstanceState: Bundle?)
     {
@@ -60,15 +62,16 @@ class MainActivity : AppCompatActivity()
         loadingOverlay.visibility = View.VISIBLE
         loadingOverlay.bringToFront()
 
-        // **FIX**: Add all fragments initially and hide them
+        // --- Add all fragments initially and hide them ---
         supportFragmentManager.beginTransaction().apply {
             add(R.id.flFragment, fifthFragment, "5").hide(fifthFragment)
             add(R.id.flFragment, fourthFragment, "4").hide(fourthFragment)
-            add(R.id.flFragment, thirdFragment, "3").hide(thirdFragment)
+            // Do NOT add thirdFragment here
             add(R.id.flFragment, firstFragment, "1").hide(firstFragment)
-            // Add and show the default fragment
             add(R.id.flFragment, secondFragment, "2")
         }.commit()
+
+        activeFragment = secondFragment // Set initial active fragment
 
         setupNavigationAfterLoad()
 
@@ -100,11 +103,18 @@ class MainActivity : AppCompatActivity()
     }
 
     private fun setupBottomNavListener() {
-        bottomNavigationView.setOnNavigationItemSelectedListener{ item ->
+        bottomNavigationView.setOnItemSelectedListener{ item ->
             when (item.itemId) {
                 R.id.dohyo -> showFragment(firstFragment)
                 R.id.favourites -> showFragment(secondFragment)
-                R.id.search -> showFragment(thirdFragment)
+                R.id.search -> {
+                    // If thirdFragment is null (e.g., first time clicking), create an empty one
+                    if (thirdFragment == null) {
+                        thirdFragment = ThirdFragment()
+                        supportFragmentManager.beginTransaction().add(R.id.flFragment, thirdFragment!!, "3").commitNow()
+                    }
+                    showFragment(thirdFragment!!)
+                }
                 R.id.oneonone -> showFragment(fourthFragment)
                 R.id.settings -> showFragment(fifthFragment)
             }
@@ -112,20 +122,47 @@ class MainActivity : AppCompatActivity()
         }
     }
 
-    // **FIX**: New function to hide the current fragment and show the new one
     private fun showFragment(fragment: Fragment) {
-        supportFragmentManager.beginTransaction().hide(activeFragment).show(fragment).commit()
+        if (activeFragment === fragment) return
+
+        val transaction = supportFragmentManager.beginTransaction()
+        transaction.hide(activeFragment).show(fragment)
+        transaction.commit()
         activeFragment = fragment
     }
 
-    // This function is now simplified, as we just need to show the fragment
     fun navigateToThirdFragment(rikishi: RikishiDetails) {
-        // Pass data to the existing thirdFragment instance
-        thirdFragment.arguments = Bundle().apply {
-            putSerializable("selectedRikishi", rikishi)
+        Log.d("MainActivity", "navigateToThirdFragment called for: ${rikishi.shikonaEn}")
+
+        // 1. Create a new ThirdFragment instance and pass the data via arguments
+        val newThirdFragment = ThirdFragment().apply {
+            arguments = Bundle().apply {
+                putSerializable("selectedRikishi", rikishi)
+            }
         }
-        // Show the third fragment
-        showFragment(thirdFragment)
+
+        val transaction = supportFragmentManager.beginTransaction()
+
+        // 2. Hide the current active fragment (SecondFragment)
+        transaction.hide(activeFragment)
+
+        // 3. If an old thirdFragment exists, remove it completely
+        if (thirdFragment != null) {
+            Log.d("MainActivity", "Removing old ThirdFragment instance.")
+            transaction.remove(thirdFragment!!)
+        }
+
+        // 4. Add the new fragment instance to the container
+        Log.d("MainActivity", "Adding new ThirdFragment instance with arguments.")
+        transaction.add(R.id.flFragment, newThirdFragment, "3") // Use the same tag
+
+        transaction.commit()
+
+        // 5. Update our references
+        thirdFragment = newThirdFragment
+        activeFragment = newThirdFragment
+
+        // 6. Update the BottomNavigationView selection
         bottomNavigationView.selectedItemId = R.id.search
     }
 }
