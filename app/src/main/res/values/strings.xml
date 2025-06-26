@@ -26,7 +26,7 @@
     <string name="sandanme">Sandanme</string>
     <string name="jonidan">Jonidan</string>
     <string name="jonokuchi">Jonokuchi</string>
-    <string name="division_statistics">Division Statistics</string>
+    <string name="division_statistics">Statistics</string>
     <string name="losses">Losses</string>
     <string name="wins">Wins</string>
     <string name="yusho">Yusho</string>
@@ -45,4 +45,5 @@
     <string name="setting_segmented_top_division">See segmented top division</string>
     <string name="show_separated_division_toggle">Show Separated Division</string>
     <string name="division_filter_all">All</string>
+    <string name="watch_match">Watch Match</string>
 </resources>

@@ -1,19 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/torikumiRow"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
     android:padding="8dp"
     android:layout_margin="4dp"
     android:background="@drawable/button_background_rectangle">
 
     <LinearLayout
+        android:id="@+id/mainContentLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:gravity="center_vertical">
+        android:gravity="center_vertical"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
         <LinearLayout
             android:layout_width="0dp"
@@ -47,15 +50,15 @@
 
             <View
                 android:id="@+id/eastCircle"
-                android:layout_width="12dp"
-                android:layout_height="12dp"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
                 android:layout_marginEnd="8dp"
                 android:background="@drawable/circle_loser"/>
 
             <View
                 android:id="@+id/westCircle"
-                android:layout_width="12dp"
-                android:layout_height="12dp"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
                 android:background="@drawable/circle_winner"/>
         </LinearLayout>
 
@@ -83,15 +86,28 @@
         </LinearLayout>
     </LinearLayout>
 
+    <View
+        android:id="@+id/centerDivider"
+        android:layout_width="1dp"
+        android:layout_height="0dp"
+        android:background="@android:color/darker_gray"
+        android:layout_marginHorizontal="8dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/mainContentLayout"
+        app:layout_constraintBottom_toBottomOf="@+id/mainContentLayout"/>
+
     <TextView
         android:id="@+id/technique"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
         android:layout_marginTop="4dp"
         android:textColor="@android:color/white"
         android:textSize="18sp"
-        android:textStyle="italic"/>
+        android:textStyle="italic"
+        app:layout_constraintTop_toBottomOf="@+id/mainContentLayout"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
 
     <TextView
         android:id="@+id/videoButton"
@@ -103,11 +119,13 @@
         android:background="@drawable/button_background_rounded_outline"
         android:foreground="@drawable/rounded_button_ripple"
         android:textStyle="bold"
-        android:layout_gravity="center_horizontal"
         android:paddingHorizontal="12dp"
         android:paddingVertical="6dp"
         android:layout_margin="4dp"
         android:clickable="true"
-        android:focusable="true" />
+        android:focusable="true"
+        app:layout_constraintTop_toBottomOf="@+id/technique"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
 
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
