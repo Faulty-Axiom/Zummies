@@ -30,7 +30,7 @@
         android:layout_marginEnd="8dp"
         app:layout_constraintEnd_toStartOf="@+id/eastCircle"
         app:layout_constraintTop_toBottomOf="@id/dateText"
-        app:layout_constraintHorizontal_weight="1"
+        app:layout_constraintStart_toStartOf="parent"
         android:layout_marginTop="8dp"/>
 
     <TextView
@@ -44,7 +44,7 @@
         android:layout_marginEnd="8dp"
         app:layout_constraintEnd_toStartOf="@+id/eastCircle"
         app:layout_constraintTop_toBottomOf="@+id/eastShikona"
-        app:layout_constraintHorizontal_weight="1" />
+        app:layout_constraintStart_toStartOf="parent" />
 
     <View
         android:id="@+id/eastCircle"
@@ -54,7 +54,7 @@
         android:layout_marginEnd="8dp"
         app:layout_constraintEnd_toStartOf="@+id/centerDivider"
         app:layout_constraintTop_toTopOf="@id/eastShikona"
-        app:layout_constraintBottom_toBottomOf="@id/westRank"/>
+        app:layout_constraintBottom_toBottomOf="@id/eastRank"/>
 
     <View
         android:id="@+id/westCircle"
@@ -79,7 +79,6 @@
         app:layout_constraintStart_toEndOf="@+id/westCircle"
         app:layout_constraintTop_toBottomOf="@id/dateText"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_weight="1"
         android:layout_marginTop="8dp"/>
 
     <TextView
@@ -93,22 +92,45 @@
         android:layout_marginStart="8dp"
         app:layout_constraintStart_toEndOf="@+id/westCircle"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/westShikona"
-        app:layout_constraintHorizontal_weight="1" />
+        app:layout_constraintTop_toBottomOf="@+id/westShikona" />
 
-    <TextView
-        android:id="@+id/technique"
+    <LinearLayout
+        android:id="@+id/technique_container"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Oshidashi"
-        android:textColor="@color/white"
-        android:textSize="18sp"
-        android:textStyle="italic"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:orientation="vertical"
+        android:gravity="center_horizontal"
+        android:layout_marginTop="8dp"
+        app:layout_constraintTop_toBottomOf="@id/eastRank"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/eastRank"
-        android:layout_marginTop="8dp"/>
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <TextView
+            android:id="@+id/technique"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Oshidashi"
+            android:textColor="@color/white"
+            android:textSize="18sp"
+            android:textStyle="italic"/>
+
+        <TextView
+            android:id="@+id/videoButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Watch Match"
+            android:textColor="@color/white"
+            android:textSize="14sp"
+            android:background="@drawable/button_background_rounded_outline"
+            android:foreground="@drawable/rounded_button_ripple"
+            android:textStyle="bold"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="6dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:layout_marginTop="4dp"/>
+    </LinearLayout>
 
     <View
         android:id="@+id/centerDivider"
@@ -119,6 +141,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@id/eastShikona"
-        app:layout_constraintBottom_toBottomOf="@id/westRank"/>
+        app:layout_constraintBottom_toBottomOf="@id/eastRank"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

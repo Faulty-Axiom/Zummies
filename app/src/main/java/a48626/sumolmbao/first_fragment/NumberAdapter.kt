@@ -39,9 +39,10 @@ class NumberAdapter(private val pages: List<List<Int>>) : RecyclerView.Adapter<N
         val numbers = pages[position]
         viewHolders[position] = holder
 
-        // Set arrow visibility
-        holder.leftArrow.visibility = View.GONE
-        holder.rightArrow.visibility = View.GONE
+        // --- FIX: Set arrow visibility based on page position ---
+        holder.leftArrow.visibility = if (position > 0) View.VISIBLE else View.GONE
+        holder.rightArrow.visibility = if (position < pages.size - 1) View.VISIBLE else View.GONE
+
         // Clear previous views
         holder.numberContainer.removeAllViews()
 

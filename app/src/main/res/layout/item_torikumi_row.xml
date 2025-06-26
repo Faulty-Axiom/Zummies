@@ -9,14 +9,12 @@
     android:layout_margin="4dp"
     android:background="@drawable/button_background_rectangle">
 
-    <!-- Torikumi row content -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical">
 
-        <!-- East side -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -40,7 +38,6 @@
                 android:textColor="@android:color/darker_gray"/>
         </LinearLayout>
 
-        <!-- Circles -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -62,7 +59,6 @@
                 android:background="@drawable/circle_winner"/>
         </LinearLayout>
 
-        <!-- West side -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -87,7 +83,6 @@
         </LinearLayout>
     </LinearLayout>
 
-    <!-- Technique name -->
     <TextView
         android:id="@+id/technique"
         android:layout_width="wrap_content"
@@ -97,5 +92,22 @@
         android:textColor="@android:color/white"
         android:textSize="18sp"
         android:textStyle="italic"/>
+
+    <TextView
+        android:id="@+id/videoButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Watch Match"
+        android:textColor="@color/white"
+        android:textSize="14sp"
+        android:background="@drawable/button_background_rounded_outline"
+        android:foreground="@drawable/rounded_button_ripple"
+        android:textStyle="bold"
+        android:layout_gravity="center_horizontal"
+        android:paddingHorizontal="12dp"
+        android:paddingVertical="6dp"
+        android:layout_margin="4dp"
+        android:clickable="true"
+        android:focusable="true" />
 
 </LinearLayout>

@@ -158,6 +158,16 @@ class FourthFragment : Fragment() {
         }
     }
 
+    override fun onHiddenChanged(hidden: Boolean) {
+        super.onHiddenChanged(hidden)
+        // 'hidden' will be true when the user navigates AWAY from this fragment.
+        if (hidden) {
+            // This is the ideal place to reset the search UI.
+            val imm = requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            imm.hideSoftInputFromWindow(view?.windowToken, 0)
+        }
+    }
+
     private fun clearSearchFocusAndHideKeyboards() {
         searchRikishi1.clearFocus()
         searchRikishi2.clearFocus()

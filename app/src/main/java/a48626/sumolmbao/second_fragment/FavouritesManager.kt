@@ -4,6 +4,7 @@ import a48626.sumolmbao.data.RikishiDetails
 import a48626.sumolmbao.data.RikishiMatch
 import android.content.Context
 import android.content.SharedPreferences
+import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 
@@ -18,15 +19,52 @@ object FavouritesManager {
     private const val KEY_FAVOURITES_HASH = "favourites_hash"
     private const val KEY_CACHED_RIKISHI_BOUTS = "cached_rikishi_bouts"
     private const val KEY_BOUTS_VISIBILITY_STATE = "bouts_visibility_state"
+    // --- NEW: Key for saving video visibility state ---
+    private const val KEY_VIDEO_VISIBILITY_STATE = "video_visibility_state"
     // Added for spoiler mode
     private const val PREFS_SETTINGS = "SettingsPreferences"
     private const val SPOILER_MODE_KEY = "SpoilerMode"
 
+    private const val TAG = "FavouritesManager" // Log Tag
 
     private val gson = Gson()
 
     private fun getPrefs(context: Context): SharedPreferences {
         return context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+    }
+
+    // --- NEW: Function to save the video visibility state ---
+    fun saveVideoVisibilityState(context: Context, state: Map<Int, Boolean>) {
+        val json = gson.toJson(state)
+        getPrefs(context).edit().putString(KEY_VIDEO_VISIBILITY_STATE, json).apply()
+    }
+
+    // --- NEW: Function to load the video visibility state ---
+    fun loadVideoVisibilityState(context: Context): MutableMap<Int, Boolean> {
+        val json = getPrefs(context).getString(KEY_VIDEO_VISIBILITY_STATE, null)
+        return if (json != null) {
+            val type = object : TypeToken<MutableMap<Int, Boolean>>() {}.type
+            gson.fromJson(json, type)
+        } else {
+            mutableMapOf()
+        }
+    }
+
+    fun saveBoutsVisibilityState(context: Context, state: Map<Int, Boolean>) {
+        val json = gson.toJson(state)
+        Log.d(TAG, "Saving Bouts Visibility State: $json")
+        getPrefs(context).edit().putString(KEY_BOUTS_VISIBILITY_STATE, json).apply()
+    }
+
+    fun loadBoutsVisibilityState(context: Context): MutableMap<Int, Boolean> {
+        val json = getPrefs(context).getString(KEY_BOUTS_VISIBILITY_STATE, null)
+        Log.d(TAG, "Loading Bouts Visibility State: $json")
+        return if (json != null) {
+            val type = object : TypeToken<MutableMap<Int, Boolean>>() {}.type
+            gson.fromJson(json, type)
+        } else {
+            mutableMapOf()
+        }
     }
 
     fun getFavouriteRikishiIds(context: Context): Set<String> {

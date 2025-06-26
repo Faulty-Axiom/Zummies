@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/videoRootLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@android:color/black"
@@ -28,5 +29,20 @@
         android:textColor="@android:color/white"
         android:textSize="18sp"
         android:visibility="gone" />
+
+    <ImageView
+        android:id="@+id/closeButton"
+        android:layout_width="38dp"
+        android:layout_height="38dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_margin="16dp"
+        android:padding="8dp"
+        android:src="@android:drawable/ic_menu_close_clear_cancel"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="Close video"
+        android:visibility="invisible"
+        android:clickable="true"
+        android:focusable="true"/>
 
 </RelativeLayout>

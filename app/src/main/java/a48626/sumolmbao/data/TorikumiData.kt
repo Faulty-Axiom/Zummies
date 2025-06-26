@@ -1,6 +1,9 @@
 package a48626.sumolmbao.data
 
-import java.io.Serializable // Add this import
+import android.os.Parcelable
+import com.google.gson.annotations.SerializedName
+import kotlinx.parcelize.Parcelize
+import java.io.Serializable
 
 data class Rikishis(
     val limit: Int,
@@ -9,6 +12,7 @@ data class Rikishis(
     val records: List<RikishiDetails>?
 )
 
+@Parcelize
 data class RikishiDetails(
     val id: Int,
     val sumodbId: Int,
@@ -27,7 +31,7 @@ data class RikishiDetails(
     val ranks: List<RankHistory>? = null,
     val shikonas: List<ShikonaHistory>? = null,
     val intai: Boolean? = null
-) : Serializable
+) : Parcelable, Serializable
 
 data class Measurement(
     val date: String,

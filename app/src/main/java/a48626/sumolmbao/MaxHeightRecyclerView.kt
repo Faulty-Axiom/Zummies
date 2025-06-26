@@ -3,7 +3,6 @@ package a48626.sumolmbao
 import android.content.Context
 import android.util.AttributeSet
 import androidx.recyclerview.widget.RecyclerView
-import a48626.sumolmbao.R // Import your R file to access custom attributes
 
 class MaxHeightRecyclerView @JvmOverloads constructor(
     context: Context,

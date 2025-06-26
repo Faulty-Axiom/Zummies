@@ -1,8 +1,11 @@
 package a48626.sumolmbao.data
 
+import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
+import kotlinx.parcelize.Parcelize
 import java.io.Serializable
 
+@Parcelize
 data class RikishiId(
     val id: Int,
     val sumodbId: Int,
@@ -20,16 +23,18 @@ data class RikishiId(
     val ranks: List<RankHistory>? = null,
     val shikonaHistory: List<ShikonaHistory>? = null,
     val intai: String? = null
-) : Serializable
+) : Parcelable, Serializable
 
+@Parcelize
 data class ShikonaHistory(
     val id: String,
     val bashoId: String,
     val rikishiId: Int,
     val shikonaEn: String,
     val shikonaJp: String
-)
+) : Parcelable, Serializable
 
+@Parcelize
 data class RikishiStats(
     val absenceByDivision: Map<String, Int>,
     val basho: Int,
@@ -44,7 +49,7 @@ data class RikishiStats(
     val winsByDivision: Map<String, Int>,
     val yusho: Int,
     val yushoByDivision: Map<String, Int>
-) : Serializable
+) : Parcelable, Serializable
 
 data class RankChange(
     val id: String,

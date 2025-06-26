@@ -33,17 +33,17 @@
         android:orientation="horizontal">
 
         <Button
-            android:id="@+id/close_import_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:text="Close" />
-
-        <Button
             android:id="@+id/save_import_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Save" />
+
+        <Button
+            android:id="@+id/close_import_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="Close" />
 
     </LinearLayout>
 

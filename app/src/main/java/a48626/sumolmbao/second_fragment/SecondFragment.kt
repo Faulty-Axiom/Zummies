@@ -46,7 +46,8 @@ import kotlin.coroutines.resume
 
 sealed class DisplayItem : Serializable {
     data class RikishiDisplayItem(val rikishiDetails: RikishiDetails) : DisplayItem()
-    data class DivisionSeparatorItem(val divisionName: String) : DisplayItem()
+    // --- FIX: Add the missing 'count' parameter to match the implementation ---
+    data class DivisionSeparatorItem(val divisionName: String, val count: Int) : DisplayItem()
     override fun equals(other: Any?): Boolean { if (this === other) return true; if (javaClass != other?.javaClass) return false; other as DisplayItem; return when (this) { is RikishiDisplayItem -> other is RikishiDisplayItem && this.rikishiDetails.id == other.rikishiDetails.id; is DivisionSeparatorItem -> other is DivisionSeparatorItem && this.divisionName == other.divisionName } }
     override fun hashCode(): Int { return when (this) { is RikishiDisplayItem -> rikishiDetails.id.hashCode(); is DivisionSeparatorItem -> divisionName.hashCode() } }
 }
@@ -73,6 +74,9 @@ class SecondFragment : Fragment() {
     private var selectedDivisionFilter: String = "All"
     private var isSpoilerModeEnabled: Boolean = false
 
+    private var allRikishiMap: Map<Int, RikishiDetails> = emptyMap()
+    private lateinit var currentStateSignature: String
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -81,9 +85,30 @@ class SecondFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_second, container, false)
     }
 
+    override fun onHiddenChanged(hidden: Boolean) {
+        super.onHiddenChanged(hidden)
+        // The 'hidden' parameter is true if the fragment is now hidden, false if it is now visible.
+        if (!hidden && isResumed) {
+            Log.d("StateCheck", "onHiddenChanged: Fragment is now VISIBLE.")
+
+            val currentStateSignature = generateCurrentStateSignature()
+            Log.d("StateCheck", "Current State Signature: $currentStateSignature")
+            Log.d("StateCheck", "Last Loaded Signature in ViewModel: ${viewModel.lastLoadedStateSignature}")
+
+            // Reload only if the state has actually changed.
+            if (currentStateSignature != viewModel.lastLoadedStateSignature) {
+                Log.i("StateCheck", "State has changed! Reloading favourites...")
+                lifecycleScope.launch {
+                    loadAndDisplayFavourites(currentStateSignature)
+                }
+            } else {
+                Log.i("StateCheck", "State is the same. No reload needed.")
+            }
+        }
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        // Log the ViewModel instance hash code to verify it's the same one.
         Log.d("ViewModelLifecycle", "Fragment onViewCreated. ViewModel instance: ${viewModel.hashCode()}")
 
         favouritesRecyclerView = view.findViewById(R.id.favourites_recycler_view)
@@ -94,26 +119,52 @@ class SecondFragment : Fragment() {
         divisionFilterRecyclerView.layoutManager = LinearLayoutManager(context)
         overlay = view.findViewById(R.id.overlay)
 
+        viewModel.boutsVisibilityState.putAll(FavouritesManager.loadBoutsVisibilityState(requireContext()))
+        viewModel.videoVisibilityState.putAll(FavouritesManager.loadVideoVisibilityState(requireContext()))
+        Log.d("FragmentState", "Loaded Bouts Visibility State: ${viewModel.boutsVisibilityState}")
+        Log.d("FragmentState", "Loaded Video Visibility State: ${viewModel.videoVisibilityState}")
+
+        currentStateSignature = generateCurrentStateSignature()
+
+        lifecycleScope.launch {
+            val rikishiDao = RikishiDatabase.getDatabase(requireContext()).rikishiDao()
+            allRikishiMap = withContext(Dispatchers.IO) {
+                rikishiDao.getAllRikishi().mapNotNull { it.toRikishiDetails() }.associateBy { it.id }
+            }
+            Log.d("SecondFragment", "Initialized allRikishiMap with ${allRikishiMap.size} entries.")
+
+            initializeAdapter()
+            setupFilterControls()
+
+            if (viewModel.lastLoadedStateSignature == null) {
+                val initialStateSignature = generateCurrentStateSignature()
+                Log.i("StateCheck", "Initial load triggered from onViewCreated.")
+                loadAndDisplayFavourites(initialStateSignature)
+            }
+        }
+    }
+
+    private fun initializeAdapter() {
+        // --- FIX: All constructor parameters are now correctly passed ---
         favouritesAdapter = FavouritesAdapter(
-            emptyList(),
-            null,
-            { rikishi -> handleRikishiItemClick(rikishi) },
-            viewModel.cachedTournamentHistory,
-            viewModel.cachedRikishiBouts,
-            viewModel.gridVisibilityState,
-            viewModel.boutsVisibilityState,
+            favouriteRikishiList = emptyList(),
+            allRikishiMap = allRikishiMap, // Use the correct map
+            onCheckScoreClick = { rikishi -> handleRikishiItemClick(rikishi) },
+            cachedTournamentHistory = viewModel.cachedTournamentHistory,
+            cachedRikishiBouts = viewModel.cachedRikishiBouts,
+            gridVisibilityState = viewModel.gridVisibilityState,
+            boutsVisibilityState = viewModel.boutsVisibilityState,
+            videoVisibilityState = viewModel.videoVisibilityState, // Pass the video state
             onDivisionHeaderClick = { divisionName -> toggleDivisionVisibility(divisionName) },
             onRikishiNameClick = { rikishi ->
                 (activity as? MainActivity)?.navigateToThirdFragment(rikishi)
             },
-            kimariteTranslations
+            kimariteMap = kimariteTranslations // Pass the translations map
         )
         favouritesRecyclerView.adapter = favouritesAdapter
-        setupFilterControls()
     }
 
     private fun setupFilterControls() {
-        // This function remains unchanged
         divisionFilterAdapter = DivisionFilterAdapter(
             emptyList(),
             onDivisionSelected = { divisionName ->
@@ -148,10 +199,29 @@ class SecondFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
+        Log.d("StateCheck", "onResume triggered.")
         isSpoilerModeEnabled = FavouritesManager.loadSpoilerModePreference(requireContext())
-        lifecycleScope.launch {
-            loadAndDisplayFavourites()
+
+        // --- This is the smart reload logic you designed ---
+        val currentStateSignature = generateCurrentStateSignature()
+        Log.d("StateCheck", "Current State Signature: $currentStateSignature")
+        Log.d("StateCheck", "Last Loaded Signature in ViewModel: ${viewModel.lastLoadedStateSignature}")
+
+        // Reload only if the state has actually changed or has never been loaded.
+        if (currentStateSignature != viewModel.lastLoadedStateSignature) {
+            Log.i("StateCheck", "State has changed! Reloading favourites...")
+            lifecycleScope.launch {
+                loadAndDisplayFavourites(currentStateSignature)
+            }
+        } else {
+            Log.i("StateCheck", "State is the same. No reload needed.")
         }
+    }
+
+    private fun generateCurrentStateSignature(): String {
+        val favouritesIds = FavouritesManager.getFavouriteRikishiIds(requireContext()).sorted().joinToString(",")
+        val isSegmented = FavouritesManager.loadSegmentedTopDivisionPreference(requireContext())
+        return "Favs:$favouritesIds|Segmented:$isSegmented"
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -173,38 +243,42 @@ class SecondFragment : Fragment() {
         }
     }
 
-    private suspend fun loadAndDisplayFavourites() {
-        val currentFavouritesHash = FavouritesManager.getFavouriteRikishiIds(requireContext()).sorted().joinToString(",")
-        if (viewModel.sortedFavouriteRikishi.isNotEmpty() && currentFavouritesHash == viewModel.lastLoadedFavouritesHash) {
-            Log.d("SecondFragmentCache", "FAST PATH: Using fresh data from ViewModel.")
-        } else {
-            Log.d("SecondFragmentCache", "SLOW PATH: Reloading data from database.")
-            val rikishiDao = RikishiDatabase.getDatabase(requireContext()).rikishiDao()
-            viewModel.sortedFavouriteRikishi = withContext(Dispatchers.IO) {
-                rikishiDao.getAllRikishi()
-                    .mapNotNull { it.toRikishiDetails() }
-                    .filter { FavouritesManager.getFavouriteRikishiIds(requireContext()).contains(it.id.toString()) }
-                    .sortedWith(getRikishiComparator())
-            }
-            viewModel.lastLoadedFavouritesHash = currentFavouritesHash
+    private suspend fun loadAndDisplayFavourites(newStateSignature: String) {
+        val rikishiDao = RikishiDatabase.getDatabase(requireContext()).rikishiDao()
+        viewModel.sortedFavouriteRikishi = withContext(Dispatchers.IO) {
+            rikishiDao.getAllRikishi()
+                .mapNotNull { it.toRikishiDetails() }
+                .filter { FavouritesManager.getFavouriteRikishiIds(requireContext()).contains(it.id.toString()) }
+                .sortedWith(getRikishiComparator())
         }
+
+        // After successfully loading, update the signature in the ViewModel
+        viewModel.lastLoadedStateSignature = newStateSignature
+        Log.d("StateCheck", "Data reloaded. Updated ViewModel signature to: ${viewModel.lastLoadedStateSignature}")
+
         lastTournamentBanzukeMap = fetchLastTournamentBanzukeSuspend()
         divisionFilterAdapter.updateData(buildFilterDivisionList(FavouritesManager.loadSegmentedTopDivisionPreference(requireContext())))
         updateFavouritesDisplay()
     }
 
     private fun updateFavouritesDisplay() {
+        if (!::favouritesAdapter.isInitialized) return
+
+        val segmentedTopDivisionEnabled = FavouritesManager.loadSegmentedTopDivisionPreference(requireContext())
+        Log.d("SettingsBug", "updateFavouritesDisplay is using 'segmentedTopDivisionEnabled' with value: $segmentedTopDivisionEnabled")
+
         favouritesAdapter.updateData(
-            buildDisplayItems(
-                FavouritesManager.loadSegmentedTopDivisionPreference(requireContext()),
+            newFavourites = buildDisplayItems(
+                segmentedTopDivisionEnabled,
                 isShowSeparatedDivisionEnabled,
                 selectedDivisionFilter
             ),
-            lastTournamentBanzukeMap,
-            viewModel.cachedTournamentHistory,
-            viewModel.cachedRikishiBouts,
-            viewModel.gridVisibilityState,
-            viewModel.boutsVisibilityState
+            newAllRikishiMap = allRikishiMap,
+            newCachedTournamentHistory = viewModel.cachedTournamentHistory,
+            newCachedRikishiBouts = viewModel.cachedRikishiBouts,
+            newGridVisibilityState = viewModel.gridVisibilityState,
+            newBoutsVisibilityState = viewModel.boutsVisibilityState,
+            newVideoVisibilityState = viewModel.videoVisibilityState
         )
     }
 
@@ -214,16 +288,19 @@ class SecondFragment : Fragment() {
         }
         if (itemPosition == RecyclerView.NO_POSITION) return
 
+        // --- ADDED LOGGING HERE ---
+        val currentState = viewModel.videoVisibilityState.getOrDefault(rikishi.id, false)
+        Log.d("StateDebug", "handleRikishiItemClick for ${rikishi.shikonaEn}. Current VideoVisible state is: $currentState. Toggling now.")
+
+        viewModel.toggleVideoVisibility(rikishi.id)
+        FavouritesManager.saveVideoVisibilityState(requireContext(), viewModel.videoVisibilityState)
+
         val areDetailsVisible = viewModel.gridVisibilityState.getOrDefault(rikishi.id, false)
         if (areDetailsVisible) {
             viewModel.gridVisibilityState[rikishi.id] = false
             viewModel.boutsVisibilityState[rikishi.id] = false
             favouritesAdapter.notifyItemChanged(itemPosition)
         } else {
-            // Log the state of the cache right before the check.
-            Log.d("ViewModelCacheState", "ViewModel History Cache Keys: ${viewModel.cachedTournamentHistory.keys}")
-            Log.d("ViewModelCacheState", "ViewModel Bouts Cache Keys: ${viewModel.cachedRikishiBouts.keys}")
-
             val historyInCache = viewModel.cachedTournamentHistory.containsKey(rikishi.id)
             val boutsInCache = viewModel.cachedRikishiBouts.containsKey(rikishi.id)
             Log.d("SecondFragmentCache", "Click for ${rikishi.shikonaEn}: History in ViewModel? $historyInCache, Bouts in ViewModel? $boutsInCache")
@@ -299,19 +376,24 @@ class SecondFragment : Fragment() {
         }
     }
 
+    // Replace the existing buildDisplayItems method with this one
     private fun buildDisplayItems(segmentedTopDivisionEnabled: Boolean, showSeparatedDivisionEnabled: Boolean, filterDivision: String): List<DisplayItem> {
         val displayItems = mutableListOf<DisplayItem>()
         val rikishiList = viewModel.sortedFavouriteRikishi
         val filteredRikishi = if (filterDivision == "All") rikishiList else rikishiList.filter { getDivisionForDisplay(it, segmentedTopDivisionEnabled) == filterDivision }
+
         if (!showSeparatedDivisionEnabled) {
             filteredRikishi.forEach { rikishi -> displayItems.add(DisplayItem.RikishiDisplayItem(rikishi)) }
             return displayItems
         }
+
         var currentDivisionName: String? = null
         for (rikishi in filteredRikishi) {
             val division = getDivisionForDisplay(rikishi, segmentedTopDivisionEnabled)
             if (filterDivision == "All" && division != currentDivisionName) {
-                displayItems.add(DisplayItem.DivisionSeparatorItem(division))
+                // FIX: Calculate the count for the new division and pass it to the constructor
+                val countForDivision = filteredRikishi.count { getDivisionForDisplay(it, segmentedTopDivisionEnabled) == division }
+                displayItems.add(DisplayItem.DivisionSeparatorItem(division, countForDivision))
                 currentDivisionName = division
             }
             if (divisionExpandedState.getOrDefault(division, true)) {
@@ -320,6 +402,7 @@ class SecondFragment : Fragment() {
         }
         return displayItems
     }
+
     private fun buildFilterDivisionList(segmentedTopDivisionEnabled: Boolean): List<String> {
         val activeDivisions = viewModel.sortedFavouriteRikishi.map { getDivisionForDisplay(it, segmentedTopDivisionEnabled) }.toSet()
         val orderedDivisions = if (segmentedTopDivisionEnabled) listOf("Yokozuna", "Ozeki", "Sekiwake", "Komusubi", "Maegashira", "Juryo", "Makushita", "Sandanme", "Jonidan", "Jonokuchi", "Retired") else listOf("Makuuchi", "Juryo", "Makushita", "Sandanme", "Jonidan", "Jonokuchi", "Retired")

@@ -125,9 +125,11 @@ class MainActivity : AppCompatActivity()
     private fun showFragment(fragment: Fragment) {
         if (activeFragment === fragment) return
 
-        val transaction = supportFragmentManager.beginTransaction()
-        transaction.hide(activeFragment).show(fragment)
-        transaction.commit()
+        supportFragmentManager.beginTransaction()
+            .hide(activeFragment)
+            .show(fragment)
+            .commit()
+
         activeFragment = fragment
     }
 

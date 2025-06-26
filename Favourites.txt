@@ -1,4 +1,14 @@
 Show user's favourite wrestlers.
 Show the user's latest matches in the specified basho
+Latest basho score/Current basho score
+Show latest match
 
+
+
+
+RED
 #5AE5A0
+#FFCF68
+
+PINK
+#101A3F

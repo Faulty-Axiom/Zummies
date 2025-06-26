@@ -156,6 +156,23 @@ class ThirdFragment : Fragment() {
         })
     }
 
+    override fun onHiddenChanged(hidden: Boolean) {
+        super.onHiddenChanged(hidden)
+        if (hidden) {
+            hideSearchAndKeyboard()
+        }
+    }
+
+    private fun hideSearchAndKeyboard() {
+        rikishiRecyclerView.visibility = View.GONE
+
+        // Hide the keyboard
+        val imm = requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(view?.windowToken, 0)
+
+        searchEditText.clearFocus()
+    }
+
     private fun clearSearchFocus() {
         searchEditText.clearFocus()
         rikishiRecyclerView.visibility = View.GONE

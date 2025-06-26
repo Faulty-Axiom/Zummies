@@ -4,10 +4,16 @@ import a48626.sumolmbao.data.Banzuke
 import a48626.sumolmbao.data.BanzukeRow
 import a48626.sumolmbao.data.Basho
 import a48626.sumolmbao.R
+import a48626.sumolmbao.VideoPlayerActivity
+import a48626.sumolmbao.data.RikishiDetails
+import a48626.sumolmbao.data.Torikumi
 import a48626.sumolmbao.data.TorikumiResponse
+import a48626.sumolmbao.database.RikishiDatabase
+import a48626.sumolmbao.database.toRikishiDetails
 import a48626.sumolmbao.retrofit.RetrofitInstance
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.os.Handler
@@ -33,10 +39,15 @@ import java.util.Calendar
 import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.core.content.edit
 import androidx.core.view.isVisible
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 import kotlin.collections.get
 import kotlin.math.abs
 
 class FirstFragment : Fragment() {
+
+    // --- NEW: Map to hold all rikishi data for quick lookup ---
+    private var allRikishiMap: Map<Int, RikishiDetails> = emptyMap()
 
     private lateinit var bashoWinnersList: TextView
     private lateinit var yearRecyclerView: RecyclerView
@@ -83,6 +94,13 @@ class FirstFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // --- NEW: Load all rikishi into the map on creation ---
+        lifecycleScope.launch {
+            val rikishiDao = RikishiDatabase.getDatabase(requireContext()).rikishiDao()
+            allRikishiMap = rikishiDao.getAllRikishi().mapNotNull { it.toRikishiDetails() }.associateBy { it.id }
+            Log.d("FirstFragment", "Initialized allRikishiMap with ${allRikishiMap.size} entries.")
+        }
+
         sharedPreferences = requireContext().getSharedPreferences("UserSelections", Context.MODE_PRIVATE)
         touchSlop = ViewConfiguration.get(requireContext()).scaledTouchSlop
 
@@ -119,14 +137,7 @@ class FirstFragment : Fragment() {
             }
 
             override fun onInterceptTouchEvent(rv: RecyclerView, e: MotionEvent): Boolean {
-                // This method decides if we should "steal" the touch event from the RecyclerView.
-                // We only steal it if the translation is already locked.
-
-                if (isTranslationLocked) {
-                    // If we are already locked, we must continue to intercept events.
-                    return true
-                }
-
+                if (isTranslationLocked) { return true }
                 when (e.action) {
                     MotionEvent.ACTION_DOWN -> {
                         downX = e.x
@@ -142,14 +153,10 @@ class FirstFragment : Fragment() {
                         handler.removeCallbacks(translationRunnable)
                     }
                 }
-
-                // By default, do NOT intercept. This allows the RecyclerView to scroll.
                 return false
             }
 
             override fun onTouchEvent(rv: RecyclerView, e: MotionEvent) {
-                // This method is only called if onInterceptTouchEvent returned true,
-                // meaning we are in a "locked" state. We just need to handle the release.
                 if (e.action == MotionEvent.ACTION_UP || e.action == MotionEvent.ACTION_CANCEL) {
                     translateAllKimarite(false)
                     isTranslationLocked = false
@@ -163,6 +170,7 @@ class FirstFragment : Fragment() {
             }
         })
 
+        // (The rest of your onViewCreated code remains the same...)
         overlay.setOnClickListener {
             hideRecyclerViewWithAnimation(yearRecyclerView)
             hideRecyclerViewWithAnimation(monthRecyclerView)
@@ -308,30 +316,25 @@ class FirstFragment : Fragment() {
 
         numberRecyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-                val layoutManager = recyclerView.layoutManager as LinearLayoutManager
-                val adapter = numberRecyclerView.adapter as? NumberAdapter
-
-                when (newState) {
-                    RecyclerView.SCROLL_STATE_DRAGGING,
-                    RecyclerView.SCROLL_STATE_SETTLING -> {
-                        val firstVisible = layoutManager.findFirstVisibleItemPosition()
-                        adapter?.getViewHolderAt(firstVisible)?.let { viewHolder ->
-                            viewHolder.leftArrow.visibility = View.GONE
-                            viewHolder.rightArrow.visibility = View.GONE
-                        }
-                    }
-                    RecyclerView.SCROLL_STATE_IDLE -> {
-                        val snappedView = snapHelper.findSnapView(layoutManager)
-                        val snappedPosition = snappedView?.let { layoutManager.getPosition(it) } ?: return
-
-                        adapter?.getViewHolderAt(snappedPosition)?.let { viewHolder ->
-                            viewHolder.leftArrow.visibility = if (snappedPosition > 0) View.VISIBLE else View.GONE
-                            viewHolder.rightArrow.visibility = if (snappedPosition < adapter.itemCount - 1) View.VISIBLE else View.GONE
+                super.onScrollStateChanged(recyclerView, newState)
+                // This is the core logic: when scrolling stops, update the arrow visibility.
+                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                    updateArrowVisibility()
+                } else {
+                    // While scrolling, temporarily hide the arrows on all visible pages.
+                    val layoutManager = recyclerView.layoutManager as LinearLayoutManager
+                    val firstVisible = layoutManager.findFirstVisibleItemPosition()
+                    val lastVisible = layoutManager.findLastVisibleItemPosition()
+                    for (i in firstVisible..lastVisible) {
+                        (recyclerView.findViewHolderForAdapterPosition(i) as? NumberAdapter.NumberViewHolder)?.let {
+                            it.leftArrow.visibility = View.GONE
+                            it.rightArrow.visibility = View.GONE
                         }
                     }
                 }
             }
         })
+
         yearButton.setOnClickListener {
             animateButtonClick(it)
             if (divisionRecyclerView.isVisible) {
@@ -429,6 +432,60 @@ class FirstFragment : Fragment() {
             }
         }
     }
+
+    private fun fetchTorikumi(bashoId: String, division: String, day: Int) {
+        RetrofitInstance.api.getTorikumi(bashoId, division, day).enqueue(object : Callback<TorikumiResponse> {
+            override fun onResponse(call: Call<TorikumiResponse>, response: Response<TorikumiResponse>) {
+                if (response.isSuccessful) {
+                    val torikumiList = response.body()?.torikumi ?: emptyList()
+                    // --- NEW: Create and set the adapter with the video click listener ---
+                    val adapter = TorikumiAdapter(torikumiList, allRikishiMap) { torikumi, eastSumoDbId, westSumoDbId ->
+                        // This lambda is the click handler
+                        val intent = Intent(requireContext(), VideoPlayerActivity::class.java).apply {
+                            putExtra(VideoPlayerActivity.EXTRA_BASHO_ID, torikumi.bashoId)
+                            putExtra(VideoPlayerActivity.EXTRA_DAY, torikumi.day)
+                            putExtra(VideoPlayerActivity.EXTRA_RIKISHI1_ID, eastSumoDbId)
+                            putExtra(VideoPlayerActivity.EXTRA_RIKISHI2_ID, westSumoDbId)
+                        }
+                        startActivity(intent)
+                    }
+
+                    torikumiRecyclerView.adapter = adapter
+                    torikumiContainer.visibility = View.VISIBLE
+                    torikumiRecyclerView.visibility = View.VISIBLE
+                    banzukeRecyclerView.visibility = View.GONE
+                    bashoWinnersContainer.visibility = View.GONE
+                    updateArrowVisibility()
+
+                } else {
+                    Log.e("TorikumiFetch", "Error ${response.code()}: ${response.errorBody()?.string()}")
+                    torikumiRecyclerView.visibility = View.GONE
+                    banzukeRecyclerView.visibility = View.GONE
+                    bashoWinnersContainer.visibility = View.GONE
+                }
+            }
+            override fun onFailure(call: Call<TorikumiResponse>, t: Throwable) {
+                Log.e("TorikumiFetch", "Network failure: ${t.message}", t)
+                torikumiContainer.visibility = View.GONE
+                torikumiRecyclerView.visibility = View.GONE
+                banzukeRecyclerView.visibility = View.GONE
+                bashoWinnersContainer.visibility = View.GONE
+            }
+        })
+    }
+
+    private fun updateArrowVisibility() {
+        val layoutManager = numberRecyclerView.layoutManager as LinearLayoutManager
+        val snapHelper = PagerSnapHelper() // It's safe to create a new one
+        val snappedView = snapHelper.findSnapView(layoutManager) ?: return
+        val snappedPosition = layoutManager.getPosition(snappedView)
+
+        (numberRecyclerView.findViewHolderForAdapterPosition(snappedPosition) as? NumberAdapter.NumberViewHolder)?.let {
+            it.leftArrow.visibility = if (snappedPosition > 0) View.VISIBLE else View.GONE
+            it.rightArrow.visibility = if (snappedPosition < (numberRecyclerView.adapter?.itemCount ?: 0) - 1) View.VISIBLE else View.GONE
+        }
+    }
+
 
     override fun onPause() {
         super.onPause()
@@ -721,36 +778,6 @@ class FirstFragment : Fragment() {
         })
     }
 
-    private fun fetchTorikumi(bashoId: String, division: String, day: Int) {
-        RetrofitInstance.api.getTorikumi(bashoId, division, day).enqueue(object : Callback<TorikumiResponse> {
-            override fun onResponse(call: Call<TorikumiResponse>, response: Response<TorikumiResponse>) {
-                if (response.isSuccessful) {
-                    val torikumiList = response.body()?.torikumi ?: emptyList()
-                    val adapter = TorikumiAdapter(torikumiList)
-
-                    torikumiRecyclerView.adapter = adapter
-                    torikumiContainer.visibility = View.VISIBLE
-                    torikumiRecyclerView.visibility = View.VISIBLE
-                    banzukeRecyclerView.visibility = View.GONE
-                    bashoWinnersContainer.visibility = View.GONE
-                } else {
-                    Log.e("TorikumiFetch", "Error ${response.code()}: ${response.errorBody()?.string()}")
-                    torikumiRecyclerView.visibility = View.GONE
-                    banzukeRecyclerView.visibility = View.GONE
-                    bashoWinnersContainer.visibility = View.GONE
-                }
-            }
-            override fun onFailure(call: Call<TorikumiResponse>, t: Throwable) {
-                Log.e("TorikumiFetch", "Network failure: ${t.message}", t)
-                torikumiContainer.visibility = View.GONE
-                torikumiRecyclerView.visibility = View.GONE
-                banzukeRecyclerView.visibility = View.GONE
-                bashoWinnersContainer.visibility = View.GONE
-            }
-        })
-    }
-
-
     private fun animateButtonClick(view: View)
     {
         val animation = AnimationUtils.loadAnimation(requireContext(), R.anim.scale_up)
@@ -791,22 +818,24 @@ class FirstFragment : Fragment() {
         }
     }
     @SuppressLint("DefaultLocale")
-    fun onDaySelected(day: Int?)
-    {
+    fun onDaySelected(day: Int?) {
         selectedDay = if (selectedDay == day) null else day
         (numberRecyclerView.adapter as? NumberAdapter)?.setSelectedDay(selectedDay)
 
         sharedPreferences.edit {
-            if (selectedDay != null)
-            {
+            if (selectedDay != null) {
                 putInt("selectedDay", selectedDay!!)
-            } else
-            {
+            } else {
                 remove("selectedDay")
             }
         }
         fetchSpecificCall()
         saveLastApiCallParams()
+
+        // Re-check and show arrows after the selection UI updates
+        handler.postDelayed({
+            updateArrowVisibility()
+        }, 100) // A small delay ensures the RecyclerView has finished its layout pass.
     }
 
     private fun clearDaySelection()

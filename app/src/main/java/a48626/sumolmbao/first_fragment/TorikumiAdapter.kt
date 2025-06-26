@@ -1,6 +1,7 @@
 package a48626.sumolmbao.first_fragment
 
 import a48626.sumolmbao.R
+import a48626.sumolmbao.data.RikishiDetails
 import a48626.sumolmbao.data.Torikumi
 import android.util.Log
 import android.view.LayoutInflater
@@ -9,7 +10,11 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
-class TorikumiAdapter(private val torikumiList: List<Torikumi>) :
+class TorikumiAdapter(
+    private val torikumiList: List<Torikumi>,
+    private val rikishiMap: Map<Int, RikishiDetails>,
+    private val onVideoClick: (Torikumi, Int?, Int?) -> Unit
+) :
     RecyclerView.Adapter<TorikumiAdapter.TorikumiViewHolder>() {
 
     class TorikumiViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -20,6 +25,7 @@ class TorikumiAdapter(private val torikumiList: List<Torikumi>) :
         val westRank: TextView = view.findViewById(R.id.westRank)
         val westCircle: View = view.findViewById(R.id.westCircle)
         val technique: TextView = view.findViewById(R.id.technique)
+        val videoButton: TextView = view.findViewById(R.id.videoButton)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TorikumiViewHolder {
@@ -49,6 +55,16 @@ class TorikumiAdapter(private val torikumiList: List<Torikumi>) :
         holder.westCircle.setBackgroundResource(
             if (!eastIsWinner) R.drawable.circle_winner else R.drawable.circle_loser
         )
+
+        holder.videoButton.setOnClickListener {
+            val eastSumoDbId = rikishiMap[torikumi.eastId]?.sumodbId
+            val westSumoDbId = rikishiMap[torikumi.westId]?.sumodbId
+            if (eastSumoDbId != null && westSumoDbId != null) {
+                onVideoClick(torikumi, eastSumoDbId, westSumoDbId)
+            } else {
+                Log.e("TorikumiAdapter", "Could not find sumodbId for one or both rikishi. East: ${torikumi.eastId}, West: ${torikumi.westId}")
+            }
+        }
     }
 
     override fun getItemCount() = torikumiList.size

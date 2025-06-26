@@ -2,6 +2,8 @@ package a48626.sumolmbao.fifth_fragment
 
 import a48626.sumolmbao.R
 import a48626.sumolmbao.favourites.FavouritesManager
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Context
 import android.os.Bundle
 import android.text.Editable
@@ -152,9 +154,9 @@ class FifthFragment : Fragment() {
     private fun setupImportExport(view: View) {
         val favouritesManager = FavouritesManager
 
+        // Your existing click listeners for showing the cards remain the same
         exportTextView.setOnClickListener {
             exportCard.visibility = View.VISIBLE
-            // exportDataTextView is already initialized in initializeViews
             exportDataTextView.setText(favouritesManager.exportFavourites(requireContext()))
         }
 
@@ -162,16 +164,32 @@ class FifthFragment : Fragment() {
             importCard.visibility = View.VISIBLE
         }
 
-        closeExportButton.setOnClickListener { // Corrected variable name
+        // --- FIX: Add the copy logic to the export card section ---
+        // Find the new button in your exportCard
+        val copyButton = view.findViewById<Button>(R.id.copy_export_button)
+
+        copyButton.setOnClickListener {
+            val exportedData = exportDataTextView.text.toString()
+            if (exportedData.isNotBlank()) {
+                val clipboard = requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                val clip = ClipData.newPlainText("Copied Favourites", exportedData)
+                clipboard.setPrimaryClip(clip)
+                Toast.makeText(requireContext(), "Copied to clipboard!", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        closeExportButton.setOnClickListener {
             exportCard.visibility = View.GONE
         }
 
-        closeImportButton.setOnClickListener { // Corrected variable name
+        // The rest of your import logic and switch logic remains exactly the same
+        closeImportButton.setOnClickListener {
             importCard.visibility = View.GONE
+            val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            imm.hideSoftInputFromWindow(view.windowToken, 0)
         }
 
-        saveImportButton.setOnClickListener { // Corrected variable name
-            // importDataEditText is already initialized in initializeViews
+        saveImportButton.setOnClickListener {
             val data = importDataEditText.text.toString()
             if (data.isNotBlank()) {
                 favouritesManager.importFavourites(requireContext(), data)
@@ -182,9 +200,7 @@ class FifthFragment : Fragment() {
             }
         }
 
-        // NEW: Add the "See segmented top division" switch
         val settingsContainer = view.findViewById<LinearLayout>(R.id.settingsContainer)
-
         val segmentedTopDivisionSwitch = Switch(context).apply {
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
@@ -207,6 +223,16 @@ class FifthFragment : Fragment() {
         selectedDefinitionText.text = item.definition
         selectedTermContainer.visibility = View.VISIBLE
         hideKeyboardAndGlossaryList()
+    }
+
+    override fun onHiddenChanged(hidden: Boolean) {
+        super.onHiddenChanged(hidden)
+        if (hidden) {
+            val imm = requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            imm.hideSoftInputFromWindow(view?.windowToken, 0)
+            glossarySearchEditText.clearFocus()
+            glossaryRecyclerView.visibility = View.GONE
+        }
     }
 
     private fun hideKeyboardAndGlossaryList() {
